@@ -1,0 +1,6 @@
+{
+  "name": "Sonya",
+  "description": "Sonya is a deeply personal, responsive AI companion application featuring speech recognition, text-to-speech audio rendering, and client-side conversational memory.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
