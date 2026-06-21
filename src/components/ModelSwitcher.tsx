@@ -103,6 +103,12 @@ function processModels(rawModels: any[]): ProcessedModels {
   };
 
   tempFree.sort(sortAlpha);
+  // Append hardcoded free model
+  tempFree.push({
+    id: 'openai/gpt-oss-120b:free',
+    name: 'openai/gpt-oss-120b:free',
+    pricing: { prompt: '0', completion: '0' }
+  });
   tempCheap.sort(sortPriceAsc);
 
   return {
