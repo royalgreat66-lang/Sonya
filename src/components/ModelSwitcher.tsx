@@ -144,6 +144,8 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
   const lastKeyRef = useRef<string>('');
 
   const fetchModels = async () => {
+    onChange('');
+
     if (provider === 'groq') {
       const groqModels: ProcessedModels = {
         free: [...GROQ_MODELS],
@@ -226,7 +228,7 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
     }, 1500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [provider]);
 
   const handleFocus = () => {
     fetchModels();
