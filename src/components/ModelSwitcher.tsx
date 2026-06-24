@@ -279,7 +279,7 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
             }
           }}
           onFocus={handleFocus}
-          className="appearance-none bg-[#0a0814]/80 border border-[#8b5cf6]/20 text-violet-300 pl-3 pr-8 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/30 hover:bg-[#8b5cf6]/5 transition-all cursor-pointer shadow-md inline-flex items-center max-w-[240px] truncate"
+          className="appearance-none bg-[#0a0814]/80 border border-[#8b5cf6]/20 text-violet-300 pl-3 pr-8 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/30 hover:bg-[#8b5cf6]/5 transition-all cursor-pointer shadow-md inline-flex items-center w-[240px] truncate"
           id="model-dropdown-select"
         >
           {!hasModels ? (
