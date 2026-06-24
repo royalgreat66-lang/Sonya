@@ -132,6 +132,18 @@ export default function App() {
     localStorage.setItem('sonya_model', modelId);
   };
 
+  const handleChangeProvider = (newProvider: string) => {
+    setProvider(newProvider);
+    localStorage.setItem('sonya_provider', newProvider);
+
+    const defaultModel = newProvider === 'groq'
+      ? 'llama-3.3-70b-versatile'
+      : 'cognitivecomputations/dolphin3.0-mistral-24b';
+
+    setSelectedModel(defaultModel);
+    localStorage.setItem('sonya_model', defaultModel);
+  };
+
   const handleSendMessage = () => {
     if (!inputVal.trim()) return;
     const textToSend = inputVal.trim();
@@ -187,7 +199,7 @@ export default function App() {
             selectedModel={selectedModel}
             onChangeModel={handleChangeModel}
             provider={provider}
-            onChangeProvider={setProvider}
+            onChangeProvider={handleChangeProvider}
             onOpenSettings={() => setIsSettingsOpen(true)}
             activeId={activeConversationId}
             activeTitle={activeTitle}

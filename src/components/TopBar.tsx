@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Settings, Trash2, Edit } from 'lucide-react';
+import { Menu, Settings, Trash2, Edit, Loader2 } from 'lucide-react';
 import { ModelSwitcher } from './ModelSwitcher';
 
 interface TopBarProps {
@@ -28,6 +28,7 @@ export function TopBar({
   onDeleteActive,
 }: TopBarProps) {
   const [isPromptRename, setIsPromptRename] = useState(false);
+  const [providerSwitching, setProviderSwitching] = useState(false);
   const groqApiKey = localStorage.getItem('groq_api_key') || '';
 
   const handleTriggerRename = () => {
@@ -70,12 +71,18 @@ export function TopBar({
         <button
           onClick={() => {
             const next = provider === 'openrouter' ? 'groq' : 'openrouter';
+            setProviderSwitching(true);
             onChangeProvider(next);
-            localStorage.setItem('sonya_provider', next);
+            setTimeout(() => setProviderSwitching(false), 500);
           }}
-          className="text-[11px] text-violet-400 hover:text-violet-300 border border-violet-500/20 px-2 py-1 rounded-md transition-colors"
+          disabled={providerSwitching}
+          className="text-[11px] text-violet-400 hover:text-violet-300 border border-violet-500/20 px-2 py-1 rounded-md transition-colors disabled:opacity-60"
         >
-          {provider === 'openrouter' ? 'OpenRouter' : 'Groq'}
+          {providerSwitching ? (
+            <Loader2 size={12} className="animate-spin text-violet-400" />
+          ) : (
+            provider === 'openrouter' ? 'OpenRouter' : 'Groq'
+          )}
         </button>
       </div>
 
