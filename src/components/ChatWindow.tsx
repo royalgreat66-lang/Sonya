@@ -18,6 +18,9 @@ interface ChatWindowProps {
   ttsLoadingMsgId: number | null | string;
   onPlayVoice: (msgId: number | string, text: string) => void;
   onStopVoice: () => void;
+
+  // Edit message
+  onEditMessage?: (messageId: number, newContent: string) => void;
 }
 
 export function ChatWindow({
@@ -33,6 +36,7 @@ export function ChatWindow({
   ttsLoadingMsgId,
   onPlayVoice,
   onStopVoice,
+  onEditMessage,
 }: ChatWindowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
@@ -105,6 +109,7 @@ export function ChatWindow({
                 onPlayVoice={() => onPlayVoice(msg.id ?? index, msg.content)}
                 onStopVoice={onStopVoice}
                 geminiKeyConfigured={geminiKeyConfigured}
+                onEditMessage={onEditMessage}
               />
             ))}
 

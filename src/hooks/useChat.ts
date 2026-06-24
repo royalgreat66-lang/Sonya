@@ -218,6 +218,90 @@ export function useChat() {
     );
   };
 
+  const editAndResend = async (messageId: number, newContent: string) => {
+    const targetMessage = messages.find(msg => msg.id === messageId);
+    if (!targetMessage || !activeConversationId) return;
+
+    const targetTime = targetMessage.createdAt;
+
+    // Build the history array locally: messages before target + the new edited user message
+    const historyBeforeTarget = messages.filter(msg => msg.createdAt < targetTime);
+    const editedUserMsg: Message = {
+      conversationId: activeConversationId,
+      role: 'user',
+      content: newContent,
+      createdAt: new Date(),
+    };
+    const updatedMsgs = [...historyBeforeTarget, editedUserMsg];
+
+    // Delete all messages from that point onward in the current conversation
+    await db.messages.where('conversationId').equals(activeConversationId)
+      .and(msg => msg.createdAt >= targetTime)
+      .delete();
+
+    // Update state to only keep messages before the target
+    setMessages(updatedMsgs);
+
+    // Save the edited message as a new user message
+    await db.messages.add(editedUserMsg);
+
+    // Re-read provider, key, model from localStorage (they're always in sync)
+    const apiKey = localStorage.getItem('sonya_openrouter_key') || '';
+    const model = localStorage.getItem('sonya_model') || '';
+    const provider = localStorage.getItem('sonya_provider') || 'openrouter';
+    const effectiveApiKey = provider === 'groq' ? (localStorage.getItem('groq_api_key') || '') : apiKey;
+
+    setSendError(null);
+    setIsStreaming(true);
+    setStreamingMessage('');
+    streamingMessageRef.current = '';
+    currentConvIdRef.current = activeConversationId;
+    originalMessagesRef.current = historyBeforeTarget;
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    await streamChatCompletion(
+      effectiveApiKey,
+      provider,
+      model,
+      updatedMsgs,
+      signal,
+      (accumulatedText) => {
+        setStreamingMessage(accumulatedText);
+        streamingMessageRef.current = accumulatedText;
+      },
+      async (fullText) => {
+        setIsStreaming(false);
+        setStreamingMessage(null);
+
+        // Save Assistant Completed Message
+        const assistantMsg: Message = {
+          conversationId: activeConversationId,
+          role: 'assistant',
+          content: fullText,
+          createdAt: new Date(),
+        };
+        await db.messages.add(assistantMsg);
+
+        // just update conversation recency
+        await db.conversations.update(activeConversationId, {
+          updatedAt: new Date(),
+        });
+
+        // Reload data
+        await loadConversations();
+        await loadMessages(activeConversationId);
+      },
+      (err) => {
+        setIsStreaming(false);
+        setStreamingMessage(null);
+        setSendError(err.message || 'Connection failed.');
+        console.error(err);
+      },
+    );
+  };
+
   const cancelStreaming = async () => {
     abortControllerRef.current?.abort();
 
@@ -259,5 +343,6 @@ export function useChat() {
     renameConversation,
     sendMessage,
     cancelStreaming,
+    editAndResend,
   };
 }

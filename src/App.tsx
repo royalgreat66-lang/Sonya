@@ -41,6 +41,7 @@ export default function App() {
     renameConversation,
     sendMessage,
     cancelStreaming,
+    editAndResend,
   } = useChat();
 
   const {
@@ -221,6 +222,7 @@ export default function App() {
             ttsLoadingMsgId={ttsLoadingMsgId}
             onPlayVoice={playVoiceText}
             onStopVoice={stopVoiceText}
+            onEditMessage={editAndResend}
           />
 
           {/* Bottom message tray bar layout */}

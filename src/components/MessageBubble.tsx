@@ -1,5 +1,5 @@
-import React from 'react';
-import { Volume2, VolumeX, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, VolumeX, Loader2, Pencil } from 'lucide-react';
 import { Message } from '../types';
 
 interface MessageBubbleProps {
@@ -10,6 +10,7 @@ interface MessageBubbleProps {
   onPlayVoice?: () => void;
   onStopVoice?: () => void;
   geminiKeyConfigured?: boolean;
+  onEditMessage?: (messageId: number, newContent: string) => void;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -20,7 +21,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onPlayVoice,
   onStopVoice,
   geminiKeyConfigured = true,
+  onEditMessage,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(message.content);
   const isSonya = message.role === 'assistant';
   const displayTime = new Date(message.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
@@ -64,20 +68,71 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         )}
 
         {/* Message Content Container */}
-        <div
-          dir={isRtl ? 'rtl' : 'ltr'}
-          className={`rounded-2xl px-4 py-3 border-[0.5px] leading-relaxed text-[13.5px] whitespace-pre-wrap break-words ${
-            isSonya
-              ? 'bg-violet-950/10 border-violet-500/20 text-[#e2d9ff]'
-              : 'bg-white/[0.04] border-white/10 text-zinc-100 rounded-tr-none'
-          } ${isRtl ? 'font-sans' : 'font-sans'}`}
-          id={`content-box-${message.id || 'streaming'}`}
-        >
-          {message.content}
+        <div className="group relative">
+          {isEditing ? (
+            <div className="space-y-2">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full bg-[#0a0814] border border-[#8b5cf6]/40 text-[#e2d9ff] rounded-xl px-3 py-2 text-[13.5px] leading-relaxed resize-none focus:outline-none focus:border-violet-500 font-sans"
+                rows={4}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (onEditMessage && message.id) {
+                      onEditMessage(message.id as number, editContent);
+                    }
+                    setIsEditing(false);
+                  }}
+                  className="px-3 py-1 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-lg transition-colors font-medium"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditContent(message.content);
+                  }}
+                  className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              dir={isRtl ? 'rtl' : 'ltr'}
+              className={`rounded-2xl px-4 py-3 border-[0.5px] leading-relaxed text-[13.5px] whitespace-pre-wrap break-words ${
+                isSonya
+                  ? 'bg-violet-950/10 border-violet-500/20 text-[#e2d9ff]'
+                  : 'bg-white/[0.04] border-white/10 text-zinc-100 rounded-tr-none'
+              } ${isRtl ? 'font-sans' : 'font-sans'}`}
+              id={`content-box-${message.id || 'streaming'}`}
+            >
+              {message.content}
+            </div>
+          )}
+
         </div>
 
         {/* Sub-bubble Meta details */}
         <div className={`flex items-center gap-2.5 text-[10px] text-zinc-500/95 pl-1 pr-1 ${isSonya ? 'justify-start' : 'justify-end'}`}>
+          {!isSonya && onEditMessage && message.id && !isEditing && (
+            <>
+              <span
+                onClick={() => {
+                  setIsEditing(true);
+                  setEditContent(message.content);
+                }}
+                className="p-0.5 text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors"
+                title="Edit message"
+              >
+                <Pencil size={10} />
+              </span>
+              <span className="text-zinc-700">|</span>
+            </>
+          )}
           <span className="font-mono">{displayTime}</span>
 
           {isSonya && geminiKeyConfigured && (
