@@ -6,6 +6,7 @@ export async function streamChatCompletion(
   provider: string,
   model: string,
   history: Message[],
+  signal: AbortSignal,
   onChunk: (accumulatedText: string) => void,
   onDone: (fullText: string) => void,
   onError: (error: Error) => void
@@ -40,6 +41,7 @@ export async function streamChatCompletion(
     const response = await fetch(endpoint, {
       method: 'POST',
       headers,
+      signal,
       body: JSON.stringify({
         model: model || (isGroq ? 'llama-3.3-70b-versatile' : 'cognitivecomputations/dolphin3.0-mistral-24b'),
         messages,
@@ -193,7 +195,8 @@ export async function streamChatCompletion(
     }
 
     onDone(accumulatedContent);
-  } catch (error: any) {
-    onError(error || new Error('Unknown connection error'));
-  }
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
+      onError(error || new Error('Unknown connection error'));
+    }
 }

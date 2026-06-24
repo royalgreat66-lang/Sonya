@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import db from '../lib/db';
 import { Conversation, Message } from '../types';
 import { streamChatCompletion } from '../lib/openrouter';
@@ -11,6 +11,10 @@ export function useChat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentConvIdRef = useRef<number | null>(null);
+  const streamingMessageRef = useRef<string | null>(null);
+  const originalMessagesRef = useRef<Message[]>([]);
 
   // Load all conversations sorted by latest updated
   const loadConversations = useCallback(async () => {
@@ -149,14 +153,22 @@ export function useChat() {
     const apiKey = provider === 'groq' ? (localStorage.getItem('groq_api_key') || '') : openRouterKey;
     setIsStreaming(true);
     setStreamingMessage('');
+    streamingMessageRef.current = '';
+    currentConvIdRef.current = currentConvId;
+    originalMessagesRef.current = originalMessages;
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     await streamChatCompletion(
       apiKey,
       provider,
       model,
       updatedMsgs,
+      signal,
       (accumulatedText) => {
         setStreamingMessage(accumulatedText);
+        streamingMessageRef.current = accumulatedText;
       },
       async (fullText) => {
         setIsStreaming(false);
@@ -202,8 +214,35 @@ export function useChat() {
         setStreamingMessage(null);
         setSendError(err.message || 'Connection failed.');
         console.error(err);
-      }
+      },
     );
+  };
+
+  const cancelStreaming = async () => {
+    abortControllerRef.current?.abort();
+
+    const partialContent = streamingMessageRef.current;
+    if (partialContent && currentConvIdRef.current) {
+      const partialMsg: Message = {
+        conversationId: currentConvIdRef.current,
+        role: 'assistant',
+        content: partialContent,
+        createdAt: new Date(),
+      };
+      await db.messages.add(partialMsg);
+
+      const updatedMessages = [...originalMessagesRef.current, partialMsg];
+      setMessages(updatedMessages);
+
+      await db.conversations.update(currentConvIdRef.current, {
+        updatedAt: new Date(),
+      });
+      await loadConversations();
+    }
+
+    setIsStreaming(false);
+    setStreamingMessage(null);
+    streamingMessageRef.current = null;
   };
 
   return {
@@ -219,5 +258,6 @@ export function useChat() {
     deleteConversation,
     renameConversation,
     sendMessage,
+    cancelStreaming,
   };
 }

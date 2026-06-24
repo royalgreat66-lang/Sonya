@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Paperclip, Mic, Send, Globe, AlertCircle } from 'lucide-react';
+import { Paperclip, Mic, Send, Globe, AlertCircle, Square } from 'lucide-react';
 
 interface InputBoxProps {
   value: string;
@@ -9,10 +9,12 @@ interface InputBoxProps {
   
   // Voice integration props
   isListening: boolean;
+  isStreaming: boolean;
   speechSupported: boolean;
   speechLang: 'en-US' | 'ar-EG';
   onToggleListening: () => void;
   onChangeSpeechLang: (lang: 'en-US' | 'ar-EG') => void;
+  onCancelStreaming: () => void;
 }
 
 export function InputBox({
@@ -21,10 +23,12 @@ export function InputBox({
   onSend,
   disableSend,
   isListening,
+  isStreaming,
   speechSupported,
   speechLang,
   onToggleListening,
   onChangeSpeechLang,
+  onCancelStreaming,
 }: InputBoxProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -126,20 +130,22 @@ export function InputBox({
             </div>
           )}
 
-          {/* Send submission button */}
+          {/* Send submission button / Stop streaming button */}
           <button
             type="button"
-            onClick={onSend}
-            disabled={disableSend || !value.trim()}
+            onClick={isStreaming ? onCancelStreaming : onSend}
+            disabled={!isStreaming && (disableSend || !value.trim())}
             className={`p-2.5 rounded-xl font-bold shadow-lg flex items-center justify-center transition-all cursor-pointer ${
-              disableSend || !value.trim()
+              !isStreaming && (disableSend || !value.trim())
                 ? 'bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed'
-                : 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-600/30'
+                : isStreaming
+                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
+                  : 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-600/30'
             }`}
-            title="Send Message"
+            title={isStreaming ? 'Stop Streaming' : 'Send Message'}
             id="btn-send-message"
           >
-            <Send size={15} />
+            {isStreaming ? <Square size={15} /> : <Send size={15} />}
           </button>
         </div>
       </div>

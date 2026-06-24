@@ -40,6 +40,7 @@ export default function App() {
     deleteConversation,
     renameConversation,
     sendMessage,
+    cancelStreaming,
   } = useChat();
 
   const {
@@ -227,12 +228,14 @@ export default function App() {
             value={inputVal}
             onChange={setInputVal}
             onSend={handleSendMessage}
-            disableSend={isStreaming}
+            disableSend={false}
             isListening={isListening}
+            isStreaming={isStreaming}
             speechSupported={speechSupported}
             speechLang={speechLang}
             onToggleListening={toggleListening}
             onChangeSpeechLang={setSpeechLang}
+            onCancelStreaming={cancelStreaming}
           />
         </div>
       </div>
