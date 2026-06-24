@@ -5,6 +5,7 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
   const [lang, setLang] = useState<'en-US' | 'ar-EG'>('en-US');
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const transcriptAccumRef = useRef<string>('');
 
   useEffect(() => {
     const SpeechRecognition =
@@ -13,8 +14,8 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
     if (SpeechRecognition) {
       setIsSupported(true);
       const rec = new SpeechRecognition();
-      rec.continuous = false;
-      rec.interimResults = false;
+      rec.continuous = true;
+      rec.interimResults = true;
       rec.maxAlternatives = 1;
 
       rec.onstart = () => {
@@ -22,9 +23,21 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
       };
 
       rec.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          onTranscript(transcript);
+        let fullTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            fullTranscript += event.results[i][0].transcript + ' ';
+          }
+        }
+        fullTranscript = fullTranscript.trim();
+
+        if (fullTranscript) {
+          const prevLen = transcriptAccumRef.current.length;
+          const newPortion = fullTranscript.slice(prevLen).trim();
+          if (newPortion) {
+            onTranscript(newPortion);
+          }
+          transcriptAccumRef.current = fullTranscript;
         }
       };
 
