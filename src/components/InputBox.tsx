@@ -29,9 +29,9 @@ export function InputBox({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    // Reset textarea layout height on clear
-    if (textareaRef.current && !value) {
+    if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
     }
   }, [value]);
 

@@ -6,6 +6,9 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
   const transcriptAccumRef = useRef<string>('');
+  const manualStopRef = useRef(false);
+  const onTranscriptRef = useRef(onTranscript);
+  onTranscriptRef.current = onTranscript;
 
   useEffect(() => {
     const SpeechRecognition =
@@ -35,7 +38,7 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
           const prevLen = transcriptAccumRef.current.length;
           const newPortion = fullTranscript.slice(prevLen).trim();
           if (newPortion) {
-            onTranscript(newPortion);
+            onTranscriptRef.current(newPortion);
           }
           transcriptAccumRef.current = fullTranscript;
         }
@@ -47,25 +50,42 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
       };
 
       rec.onend = () => {
-        setIsListening(false);
+        if (manualStopRef.current) {
+          setIsListening(false);
+          manualStopRef.current = false;
+        } else {
+          try {
+            recognitionRef.current.start();
+          } catch (e) {}
+        }
       };
 
       recognitionRef.current = rec;
     } else {
       setIsSupported(false);
     }
-  }, [onTranscript]);
+
+    return () => {
+      manualStopRef.current = true;
+      try {
+        recognitionRef.current?.stop();
+      } catch (e) {}
+    };
+  }, []);
 
   const toggleListening = () => {
     if (!isSupported || !recognitionRef.current) return;
 
     if (isListening) {
       try {
+        manualStopRef.current = true;
         recognitionRef.current.stop();
       } catch (e) {}
       setIsListening(false);
     } else {
       try {
+        manualStopRef.current = false;
+        transcriptAccumRef.current = '';
         // Dynamically apply selected oral language context
         recognitionRef.current.lang = lang;
         recognitionRef.current.start();
