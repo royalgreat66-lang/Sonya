@@ -6,6 +6,8 @@ interface TopBarProps {
   onToggleSidebar: () => void;
   selectedModel: string;
   onChangeModel: (model: string) => void;
+  provider: string;
+  onChangeProvider: (provider: string) => void;
   onOpenSettings: () => void;
   activeId: number | null;
   activeTitle: string;
@@ -17,6 +19,8 @@ export function TopBar({
   onToggleSidebar,
   selectedModel,
   onChangeModel,
+  provider,
+  onChangeProvider,
   onOpenSettings,
   activeId,
   activeTitle,
@@ -24,6 +28,7 @@ export function TopBar({
   onDeleteActive,
 }: TopBarProps) {
   const [isPromptRename, setIsPromptRename] = useState(false);
+  const groqApiKey = localStorage.getItem('groq_api_key') || '';
 
   const handleTriggerRename = () => {
     if (!activeId) return;
@@ -56,7 +61,22 @@ export function TopBar({
           <Menu size={18} />
         </button>
 
-        <ModelSwitcher selectedModel={selectedModel} onChange={onChangeModel} />
+        <ModelSwitcher
+          selectedModel={selectedModel}
+          onChange={onChangeModel}
+          provider={provider}
+          groqApiKey={groqApiKey}
+        />
+        <button
+          onClick={() => {
+            const next = provider === 'openrouter' ? 'groq' : 'openrouter';
+            onChangeProvider(next);
+            localStorage.setItem('sonya_provider', next);
+          }}
+          className="text-[11px] text-violet-400 hover:text-violet-300 border border-violet-500/20 px-2 py-1 rounded-md transition-colors"
+        >
+          {provider === 'openrouter' ? 'OpenRouter' : 'Groq'}
+        </button>
       </div>
 
       {/* Center metadata tag */}

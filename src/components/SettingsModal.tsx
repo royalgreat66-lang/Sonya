@@ -26,6 +26,8 @@ export function SettingsModal({
 
   const [showOr, setShowOr] = useState(false);
   const [showGem, setShowGem] = useState(false);
+  const [groqKey, setGroqKey] = useState(() => localStorage.getItem('groq_api_key') || '');
+  const [showGroq, setShowGroq] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Sync state whenever modal opens or props change
@@ -42,6 +44,7 @@ export function SettingsModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem('groq_api_key', groqKey);
     onSave({
       openRouterKey: orKey.trim(),
       geminiKey: gemKey.trim(),
@@ -160,6 +163,39 @@ export function SettingsModal({
                 id="btn-toggle-gemini-visibility"
               >
                 {showGem ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Groq Key */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-[#888] uppercase tracking-wider flex items-center justify-between">
+              <span>Groq API Key (Free Models)</span>
+              <a
+                href="https://console.groq.com/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-violet-400 hover:underline hover:text-violet-300 normal-case font-normal text-[10px]"
+              >
+                Get Key
+              </a>
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type={showGroq ? 'text' : 'password'}
+                value={groqKey}
+                onChange={(e) => setGroqKey(e.target.value)}
+                placeholder="gsk_..."
+                className="w-full bg-zinc-950 border border-violet-500/10 text-[#e2d9ff] text-sm px-3.5 py-2.5 rounded-lg pr-10 outline-none focus:border-[#8b5cf6]/40 focus:ring-1 focus:ring-[#8b5cf6]/20 transition-all font-mono"
+                id="input-groq-key"
+              />
+              <button
+                type="button"
+                onClick={() => setShowGroq(!showGroq)}
+                className="absolute right-3.5 text-zinc-500 hover:text-[#e2d9ff] transition-colors"
+                id="btn-toggle-groq-visibility"
+              >
+                {showGroq ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
           </div>

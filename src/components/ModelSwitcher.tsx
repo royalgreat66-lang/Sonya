@@ -21,6 +21,15 @@ let globalCachedModels: ProcessedModels | null = null;
 
 const keywords = ["dolphin", "hermes", "venice", "nous", "uncensored", "grok", "mixtral", "wizard"];
 
+const GROQ_MODELS = [
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+  { id: 'llama-3.1-70b-versatile', name: 'Llama 3.1 70B' },
+  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B (Fast)' },
+  { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
+  { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B' },
+  { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B' },
+];
+
 function processModels(rawModels: any[]): ProcessedModels {
   const filtered = rawModels.filter(m => {
     if (!m || !m.id) return false;
@@ -121,9 +130,11 @@ function processModels(rawModels: any[]): ProcessedModels {
 interface ModelSwitcherProps {
   selectedModel: string;
   onChange: (model: string) => void;
+  provider: string;
+  groqApiKey: string;
 }
 
-export function ModelSwitcher({ selectedModel, onChange }: ModelSwitcherProps) {
+export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }: ModelSwitcherProps) {
   const [models, setModels] = useState<ProcessedModels>(() => {
     if (globalCachedModels) return globalCachedModels;
     return { free: [], cheap: [], allFiltered: [] };
@@ -133,6 +144,17 @@ export function ModelSwitcher({ selectedModel, onChange }: ModelSwitcherProps) {
   const lastKeyRef = useRef<string>('');
 
   const fetchModels = async () => {
+    if (provider === 'groq') {
+      const groqModels: ProcessedModels = {
+        free: [...GROQ_MODELS],
+        cheap: [],
+        allFiltered: [...GROQ_MODELS],
+      };
+      setModels(groqModels);
+      globalCachedModels = null;
+      return;
+    }
+
     const apiKey = localStorage.getItem('sonya_openrouter_key') || '';
     lastKeyRef.current = apiKey;
 
@@ -234,6 +256,7 @@ export function ModelSwitcher({ selectedModel, onChange }: ModelSwitcherProps) {
     }
   };
 
+  const isGroqProvider = provider === 'groq';
   const hasFree = models.free.length > 0;
   const hasCheap = models.cheap.length > 0;
   const hasModels = models.allFiltered.length > 0;
@@ -261,6 +284,14 @@ export function ModelSwitcher({ selectedModel, onChange }: ModelSwitcherProps) {
             <option value="" disabled className="bg-[#0f0c1a] text-[#888] text-xs py-2">
               No compatible models found — check your API key
             </option>
+          ) : isGroqProvider ? (
+            <>
+              {GROQ_MODELS.map((model) => (
+                <option key={model.id} value={model.id} className="bg-[#0f0c1a] text-[#e2d9ff] text-xs font-medium py-1.5 normal-case">
+                  {model.name}
+                </option>
+              ))}
+            </>
           ) : (
             <>
               {/* If selected model is not in filtered list, create placeholder option */}

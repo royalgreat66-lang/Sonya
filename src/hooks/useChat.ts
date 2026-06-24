@@ -117,6 +117,7 @@ export function useChat() {
     content: string,
     openRouterKey: string,
     model: string,
+    provider: string,
     onSpeechPlaybackRequest?: (text: string) => void
   ) => {
     if (!content.trim()) return;
@@ -144,12 +145,14 @@ export function useChat() {
     // 1. Save User Message to DB
     await db.messages.add(userMsg);
 
-    // 2. Prepare history and kickoff OpenRouter streaming
+    // 2. Prepare history and kickoff streaming
+    const apiKey = provider === 'groq' ? (localStorage.getItem('groq_api_key') || '') : openRouterKey;
     setIsStreaming(true);
     setStreamingMessage('');
 
     await streamChatCompletion(
-      openRouterKey,
+      apiKey,
+      provider,
       model,
       updatedMsgs,
       (accumulatedText) => {

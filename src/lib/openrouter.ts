@@ -3,6 +3,7 @@ import { SONYA_SYSTEM_PROMPT } from './sonyaPrompt';
 
 export async function streamChatCompletion(
   apiKey: string,
+  provider: string,
   model: string,
   history: Message[],
   onChunk: (accumulatedText: string) => void,
@@ -14,6 +15,19 @@ export async function streamChatCompletion(
       throw new Error('OpenRouter API Key is missing. Please add it to Settings.');
     }
 
+    const isGroq = provider === 'groq';
+    const endpoint = isGroq
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://openrouter.ai/api/v1/chat/completions';
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+    if (!isGroq) {
+      headers['HTTP-Referer'] = 'https://sonya.app';
+      headers['X-Title'] = 'Sonya Companion';
+    }
+
     // Prepare full list of messages with system prompt first
     const messages = [
       { role: 'system', content: SONYA_SYSTEM_PROMPT },
@@ -23,16 +37,11 @@ export async function streamChatCompletion(
       })),
     ];
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://sonya.app',
-        'X-Title': 'Sonya Companion',
-      },
+      headers,
       body: JSON.stringify({
-        model: model || 'cognitivecomputations/dolphin3.0-mistral-24b',
+        model: model || (isGroq ? 'llama-3.3-70b-versatile' : 'cognitivecomputations/dolphin3.0-mistral-24b'),
         messages,
         stream: true,
         max_tokens: 2048,
@@ -62,6 +71,8 @@ export async function streamChatCompletion(
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
     let accumulatedContent = '';
+    let isThinking = false;
+    let hasStartedOutput = false;
 
     while (true) {
       const { value, done } = await reader.read();
@@ -88,7 +99,37 @@ export async function streamChatCompletion(
             const content = parsed.choices?.[0]?.delta?.content || '';
             if (content) {
               accumulatedContent += content;
-              onChunk(accumulatedContent);
+
+              if (!isThinking) {
+                const thinkStart = accumulatedContent.indexOf('<think>');
+                if (thinkStart !== -1) {
+                  isThinking = true;
+                }
+              }
+
+              if (isThinking) {
+                const thinkEnd = accumulatedContent.indexOf('</think>');
+                if (thinkEnd !== -1) {
+                  // Strip everything up to and including </think>
+                  const stripped = accumulatedContent.substring(thinkEnd + '</think>'.length).replace(/^[\s\n\r]+/, '');
+                  isThinking = false;
+                  hasStartedOutput = false;
+                  accumulatedContent = stripped;
+                  if (stripped) {
+                    onChunk(stripped);
+                  }
+                }
+                // else: still thinking, no output
+              } else {
+                if (!hasStartedOutput) {
+                  const trimmed = accumulatedContent.replace(/^[\s\n\r]+/, '');
+                  accumulatedContent = trimmed;
+                  onChunk(trimmed);
+                  hasStartedOutput = true;
+                } else {
+                  onChunk(accumulatedContent);
+                }
+              }
             }
           } catch (e: any) {
             if (e.message && e.message.includes('OpenRouter Error:')) {
@@ -113,7 +154,35 @@ export async function streamChatCompletion(
           const content = parsed.choices?.[0]?.delta?.content || '';
           if (content) {
             accumulatedContent += content;
-            onChunk(accumulatedContent);
+
+            if (!isThinking) {
+              const thinkStart = accumulatedContent.indexOf('<think>');
+              if (thinkStart !== -1) {
+                isThinking = true;
+              }
+            }
+
+            if (isThinking) {
+              const thinkEnd = accumulatedContent.indexOf('</think>');
+              if (thinkEnd !== -1) {
+                const stripped = accumulatedContent.substring(thinkEnd + '</think>'.length).replace(/^[\s\n\r]+/, '');
+                isThinking = false;
+                hasStartedOutput = false;
+                accumulatedContent = stripped;
+                if (stripped) {
+                  onChunk(stripped);
+                }
+              }
+            } else {
+              if (!hasStartedOutput) {
+                const trimmed = accumulatedContent.replace(/^[\s\n\r]+/, '');
+                accumulatedContent = trimmed;
+                onChunk(trimmed);
+                hasStartedOutput = true;
+              } else {
+                onChunk(accumulatedContent);
+              }
+            }
           }
         } catch (e: any) {
           if (e.message && e.message.includes('OpenRouter Error:')) {

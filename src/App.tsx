@@ -14,6 +14,7 @@ export default function App() {
   const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('sonya_gemini_key') || '');
   const [autoVoiceOutput, setAutoVoiceOutput] = useState(() => localStorage.getItem('sonya_auto_voice') === 'true');
   const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('sonya_model') || 'cognitivecomputations/dolphin3.0-mistral-24b');
+  const [provider, setProvider] = useState(() => localStorage.getItem('sonya_provider') || 'openrouter');
 
   // UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -145,6 +146,7 @@ export default function App() {
       textToSend,
       openRouterKey,
       selectedModel,
+      provider,
       (fullTextReply) => {
         // Callback executed upon completion of OpenRouter stream
         if (autoVoiceOutput && geminiKey) {
@@ -184,6 +186,8 @@ export default function App() {
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             selectedModel={selectedModel}
             onChangeModel={handleChangeModel}
+            provider={provider}
+            onChangeProvider={setProvider}
             onOpenSettings={() => setIsSettingsOpen(true)}
             activeId={activeConversationId}
             activeTitle={activeTitle}
