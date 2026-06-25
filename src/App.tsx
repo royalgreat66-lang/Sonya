@@ -181,7 +181,7 @@ export default function App() {
         id="ambient-aurora-bg"
       />
 
-      <div className="flex w-full min-h-screen z-10 overflow-hidden relative" id="layout-grid-workspace">
+      <div className="flex w-full h-screen z-10 overflow-hidden relative" id="layout-grid-workspace">
         {/* Responsive left hand sidebar drawer controls */}
         <Sidebar
           conversations={conversations}

@@ -60,7 +60,7 @@ export function ChatWindow({
   const isWelcomeScreen = !activeId || (messages.length === 0 && !isStreaming);
 
   return (
-    <div className="flex-1 flex flex-col bg-black overflow-hidden relative" id="chat-window-viewport">
+    <div className="flex-1 flex flex-col bg-black overflow-hidden relative h-full" id="chat-window-viewport">
       {/* Scrollable chat body */}
       <div
         ref={containerRef}
