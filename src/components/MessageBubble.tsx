@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Loader2, Pencil } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 
 interface MessageBubbleProps {
@@ -110,7 +111,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               } ${isRtl ? 'font-sans' : 'font-sans'}`}
               id={`content-box-${message.id || 'streaming'}`}
             >
-              {message.content}
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <span>{children}</span>
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           )}
 
