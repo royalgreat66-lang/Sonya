@@ -49,14 +49,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     >
       {/* Avatar Node */}
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-md border flex-shrink-0 select-none ${
+        className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm shadow-md border flex-shrink-0 select-none ${
           isSonya
             ? 'border-violet-500/30'
             : 'bg-zinc-800 border-zinc-700 text-[#888]'
         }`}
         id={`avatar-${isSonya ? 'sonya' : 'user'}`}
       >
-        {isSonya ? <img src="/Sonya/sonya.png" className="w-full h-full rounded-full object-cover" /> : 'U'}
+        {isSonya ? <img src="/Sonya/sonya-avatar.png" className="w-full h-full rounded-full object-cover" /> : 'U'}
       </div>
 
       {/* Bubble, Timestamp, and Voice Trigger Container */}
