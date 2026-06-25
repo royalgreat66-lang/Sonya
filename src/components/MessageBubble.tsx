@@ -71,7 +71,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {/* Message Content Container */}
         <div className="group relative">
           {isEditing ? (
-            <div className="space-y-2">
+            <div className="space-y-2 w-[min(600px,90vw)]">
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}

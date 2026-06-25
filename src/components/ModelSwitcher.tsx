@@ -238,17 +238,8 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
     if (!hasModels) return;
     try {
       // Format all models: free section first, then cheap section
-      const lines: string[] = [];
-      if (models.free.length > 0) {
-        lines.push('=== Free Models ===');
-        models.free.forEach(m => lines.push(m.id));
-      }
-      if (models.cheap.length > 0) {
-        if (lines.length > 0) lines.push('');
-        lines.push('=== Cheap Models (< $1 / 1M tokens) ===');
-        models.cheap.forEach(m => lines.push(m.id));
-      }
-      await navigator.clipboard.writeText(lines.join('\n'));
+      const allIds = [...models.free, ...models.cheap].map(m => m.id);
+await navigator.clipboard.writeText(allIds.join('\n'));
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
