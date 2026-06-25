@@ -1,0 +1,19 @@
+{
+  "name": "Sonya",
+  "short_name": "Sonya",
+  "background_color": "#000000",
+  "theme_color": "#8b5cf6",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/sonya.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/sonya.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

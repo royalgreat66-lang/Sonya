@@ -51,12 +51,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-md border flex-shrink-0 select-none ${
           isSonya
-            ? 'bg-gradient-to-tr from-violet-700 to-indigo-900 border-violet-500/30 text-[#e2d9ff]'
+            ? 'border-violet-500/30'
             : 'bg-zinc-800 border-zinc-700 text-[#888]'
         }`}
         id={`avatar-${isSonya ? 'sonya' : 'user'}`}
       >
-        {isSonya ? 'S' : 'U'}
+        {isSonya ? <img src="/Sonya/sonya.png" className="w-full h-full rounded-full object-cover" /> : 'U'}
       </div>
 
       {/* Bubble, Timestamp, and Voice Trigger Container */}
