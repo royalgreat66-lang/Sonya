@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import db from '../lib/db';
 import { Conversation, Message } from '../types';
 import { streamChatCompletion } from '../lib/openrouter';
+import { ContentPart } from '../types';
+
+const VISION_MODEL_IDS = [
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'qwen/qwen3.6-27b',
+];
 
 export function useChat() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -122,6 +128,7 @@ export function useChat() {
     openRouterKey: string,
     model: string,
     provider: string,
+    imageBase64?: string,
     onSpeechPlaybackRequest?: (text: string) => void
   ) => {
     if (!content.trim()) return;
@@ -134,10 +141,24 @@ export function useChat() {
       currentConvId = await startNewConversation();
     }
 
+    let userContent: string | ContentPart[] = content.trim();
+
+    if (imageBase64) {
+      if (VISION_MODEL_IDS.includes(model)) {
+        userContent = [
+          { type: 'text', text: content.trim() },
+          { type: 'image_url', image_url: { url: imageBase64 } },
+        ];
+      } else {
+        setSendError('This model does not support image analysis.');
+        return;
+      }
+    }
+
     const userMsg: Message = {
       conversationId: currentConvId,
       role: 'user',
-      content: content.trim(),
+      content: userContent,
       createdAt: new Date(),
     };
 

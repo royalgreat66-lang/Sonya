@@ -34,7 +34,7 @@ export async function streamChatCompletion(
       { role: 'system', content: SONYA_SYSTEM_PROMPT },
       ...history.map((msg) => ({
         role: msg.role,
-        content: msg.content,
+        content: Array.isArray(msg.content) ? msg.content : msg.content,
       })),
     ];
 

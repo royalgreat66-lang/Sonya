@@ -24,8 +24,28 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   geminiKeyConfigured = true,
   onEditMessage,
 }) => {
+  const getTextContent = (content: string | any[]): string => {
+    if (Array.isArray(content)) {
+      const textPart = content.find(part => part.type === 'text');
+      return textPart ? textPart.text : '';
+    }
+    return content;
+  };
+
+  const getImageContent = (content: string | any[]): string | null => {
+    if (Array.isArray(content)) {
+      const imgPart = content.find(part => part.type === 'image_url');
+      return imgPart ? imgPart.image_url.url : null;
+    }
+    return null;
+  };
+
+  const textContent = getTextContent(message.content);
+  const imageContent = getImageContent(message.content);
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(message.content);
+  const [editContent, setEditContent] = useState(textContent);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const isSonya = message.role === 'assistant';
   const displayTime = new Date(message.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
@@ -38,7 +58,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     return arabicPartExp.test(text.substring(0, 50));
   };
 
-  const isRtl = isArabicText(message.content);
+  const isRtl = isArabicText(textContent);
 
   return (
     <div
@@ -68,6 +88,38 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </p>
         )}
 
+        {/* Image thumbnail above text bubble */}
+        {imageContent && (
+          <div className={`${!isSonya ? 'flex justify-end' : ''}`}>
+            <button
+              type="button"
+              onClick={() => setLightboxImage(imageContent)}
+              className="inline-block p-0 border-0 bg-transparent cursor-pointer"
+            >
+              <img
+                src={imageContent}
+                alt="Attached image"
+                className="max-h-[160px] w-auto rounded-xl object-contain border border-white/10 hover:opacity-90 transition-opacity"
+              />
+            </button>
+          </div>
+        )}
+
+        {/* Lightbox overlay */}
+        {lightboxImage && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center cursor-pointer"
+            onClick={() => setLightboxImage(null)}
+          >
+            <img
+              src={lightboxImage}
+              alt="Full size image"
+              className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+
         {/* Message Content Container */}
         <div className="group relative">
           {isEditing ? (
@@ -93,7 +145,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 <button
                   onClick={() => {
                     setIsEditing(false);
-                    setEditContent(message.content);
+                    setEditContent(textContent);
                   }}
                   className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-lg transition-colors"
                 >
@@ -102,23 +154,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               </div>
             </div>
           ) : (
-            <div
-              dir={isRtl ? 'rtl' : 'ltr'}
-              className={`rounded-2xl px-4 py-3 border-[0.5px] leading-relaxed text-[13.5px] whitespace-pre-wrap break-words ${
-                isSonya
-                  ? 'bg-violet-950/10 border-violet-500/20 text-[#e2d9ff]'
-                  : 'bg-white/[0.04] border-white/10 text-zinc-100 rounded-tr-none'
-              } ${isRtl ? 'font-sans' : 'font-sans'}`}
-              id={`content-box-${message.id || 'streaming'}`}
-            >
-              <ReactMarkdown
-                components={{
-                  p: ({ children }) => <span>{children}</span>
-                }}
+            textContent && (
+              <div
+                dir={isRtl ? 'rtl' : 'ltr'}
+                className={`rounded-2xl px-4 py-3 border-[0.5px] leading-relaxed text-[13.5px] whitespace-pre-wrap break-words ${
+                  isSonya
+                    ? 'bg-violet-950/10 border-violet-500/20 text-[#e2d9ff]'
+                    : 'bg-white/[0.04] border-white/10 text-zinc-100 rounded-tr-none'
+                } ${isRtl ? 'font-sans' : 'font-sans'}`}
+                id={`content-box-${message.id || 'streaming'}`}
               >
-                {message.content}
-              </ReactMarkdown>
-            </div>
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <span>{children}</span>
+                  }}
+                >
+                  {textContent}
+                </ReactMarkdown>
+              </div>
+            )
           )}
 
         </div>
@@ -130,7 +184,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               <span
                 onClick={() => {
                   setIsEditing(true);
-                  setEditContent(message.content);
+                  setEditContent(textContent);
                 }}
                 className="p-0.5 text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors"
                 title="Edit message"

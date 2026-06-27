@@ -4,6 +4,7 @@ import { ChevronDown, Cpu, Copy, Check } from 'lucide-react';
 interface Model {
   id: string;
   name: string;
+  vision?: boolean;
   pricing?: {
     prompt?: string | number;
     completion?: string | number;
@@ -21,13 +22,18 @@ let globalCachedModels: ProcessedModels | null = null;
 
 const keywords = ["dolphin", "hermes", "venice", "nous", "uncensored", "grok", "mixtral", "wizard"];
 
+const VISION_MODEL_IDS = [
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'qwen/qwen3.6-27b',
+];
+
 const GROQ_MODELS = [
   { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
   { id: 'llama-3.1-70b-versatile', name: 'Llama 3.1 70B' },
   { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B (Fast)' },
-  { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
+  { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', vision: true },
   { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B' },
-  { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B' },
+  { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B', vision: true },
 ];
 
 function processModels(rawModels: any[]): ProcessedModels {
@@ -74,6 +80,7 @@ function processModels(rawModels: any[]): ProcessedModels {
     const modelObj: Model = {
       id: m.id,
       name: m.name || m.id,
+      vision: VISION_MODEL_IDS.includes(m.id) || undefined,
       pricing: m.pricing
     };
 

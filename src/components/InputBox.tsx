@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from 'react';
-import { Paperclip, Mic, Send, Globe, AlertCircle, Square } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Mic, Send, Globe, AlertCircle, Square, X, ImageIcon } from 'lucide-react';
 
 interface InputBoxProps {
   value: string;
   onChange: (val: string) => void;
-  onSend: () => void;
+  onSend: (imageBase64?: string) => void;
   disableSend: boolean;
   
   // Voice integration props
@@ -31,6 +31,8 @@ export function InputBox({
   onCancelStreaming,
 }: InputBoxProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -51,9 +53,26 @@ export function InputBox({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!disableSend && value.trim()) {
-        onSend();
+        onSend(attachedImage || undefined);
+        setAttachedImage(null);
       }
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAttachedImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    // Reset so same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = () => {
+    setAttachedImage(null);
   };
 
   const toggleLang = () => {
@@ -69,16 +88,47 @@ export function InputBox({
         </div>
       )}
 
+      {attachedImage && (
+        <div className="max-w-3xl mx-auto w-full mb-2 relative inline-flex">
+          <div className="relative rounded-xl overflow-hidden border border-violet-500/20 bg-[#0a0814]">
+            <img
+              src={attachedImage}
+              alt="Attached"
+              className="max-h-[120px] w-auto object-contain"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black/80 rounded-full text-zinc-300 hover:text-white transition-colors"
+              title="Remove image"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-3xl mx-auto flex items-end gap-3 bg-[#0a0814]/80 border border-[#8b5cf6]/20 backdrop-blur-md rounded-2xl p-3 shadow-2xl shadow-violet-900/10 relative z-10" id="input-box-container">
-        {/* Paperclip upload indicator */}
+        {/* Image attachment button */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
         <button
           type="button"
-          onClick={() => alert('Attachments can be added here. (UI design only for this build)')}
-          className="p-2.5 text-zinc-500 hover:text-violet-300 transition-colors hover:bg-white/5 rounded-lg flex-shrink-0 cursor-pointer"
-          title="Attach files (UI Mockup Only)"
-          id="btn-paperclip-mockup"
+          onClick={() => fileInputRef.current?.click()}
+          className={`p-2.5 transition-colors rounded-lg flex-shrink-0 cursor-pointer ${
+            attachedImage
+              ? 'text-violet-400 bg-violet-500/10'
+              : 'text-zinc-500 hover:text-violet-300 hover:bg-white/5'
+          }`}
+          title="Attach an image"
+          id="btn-paperclip"
         >
-          <Paperclip size={18} />
+          <ImageIcon size={18} />
         </button>
 
         {/* Text Entry Textarea */}
@@ -133,7 +183,14 @@ export function InputBox({
           {/* Send submission button / Stop streaming button */}
           <button
             type="button"
-            onClick={isStreaming ? onCancelStreaming : onSend}
+            onClick={() => {
+              if (isStreaming) {
+                onCancelStreaming();
+              } else {
+                onSend(attachedImage || undefined);
+                setAttachedImage(null);
+              }
+            }}
             disabled={!isStreaming && (disableSend || !value.trim())}
             className={`p-2.5 rounded-xl font-bold shadow-lg flex items-center justify-center transition-all cursor-pointer ${
               !isStreaming && (disableSend || !value.trim())

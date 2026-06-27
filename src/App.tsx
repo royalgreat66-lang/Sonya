@@ -146,7 +146,7 @@ export default function App() {
     localStorage.setItem('sonya_model', defaultModel);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (imageBase64?: string) => {
     if (!inputVal.trim()) return;
     const textToSend = inputVal.trim();
     setInputVal('');
@@ -161,6 +161,7 @@ export default function App() {
       openRouterKey,
       selectedModel,
       provider,
+      imageBase64,
       (fullTextReply) => {
         // Callback executed upon completion of OpenRouter stream
         if (autoVoiceOutput && geminiKey) {
