@@ -144,9 +144,8 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
   const lastKeyRef = useRef<string>('');
 
   const fetchModels = async () => {
-    onChange('');
-
     if (provider === 'groq') {
+      
       const groqModels: ProcessedModels = {
         free: [...GROQ_MODELS],
         cheap: [],
@@ -188,19 +187,21 @@ export function ModelSwitcher({ selectedModel, onChange, provider, groqApiKey }:
         setModels(processed);
         globalCachedModels = processed;
 
-        // Auto-select selection logic
-        const savedModel = localStorage.getItem('sonya_model');
-        const isSavedInFiltered = savedModel ? processed.allFiltered.some(m => m.id === savedModel) : false;
+        // Auto-select selection logic (only for openrouter)
+        if (provider === 'openrouter') {
+          const savedModel = localStorage.getItem('sonya_model');
+          const isSavedInFiltered = savedModel ? processed.allFiltered.some(m => m.id === savedModel) : false;
 
-        if (!isSavedInFiltered) {
-          let fallbackId = '';
-          if (processed.free.length > 0) {
-            fallbackId = processed.free[0].id;
-          } else if (processed.cheap.length > 0) {
-            fallbackId = processed.cheap[0].id;
-          }
-          if (fallbackId) {
-            onChange(fallbackId);
+          if (!isSavedInFiltered) {
+            let fallbackId = '';
+            if (processed.free.length > 0) {
+              fallbackId = processed.free[0].id;
+            } else if (processed.cheap.length > 0) {
+              fallbackId = processed.cheap[0].id;
+            }
+            if (fallbackId) {
+              onChange(fallbackId);
+            }
           }
         }
       } else {
