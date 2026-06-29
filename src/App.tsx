@@ -58,7 +58,11 @@ export default function App() {
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const activeTitle = activeConversation ? activeConversation.title : 'New conversation';
 
-  const forceSetup = !openRouterKey || !geminiKey;
+  const [setupDismissed, setSetupDismissed] = useState(
+    () => localStorage.getItem('sonya_setup_dismissed') === 'true'
+  );
+
+  const forceSetup = !setupDismissed && (!openRouterKey || !geminiKey);
 
   // On first mount or empty keys state, force triggers settings dialog opening
   useEffect(() => {
@@ -125,7 +129,14 @@ export default function App() {
     localStorage.setItem('sonya_openrouter_key', settings.openRouterKey);
     localStorage.setItem('sonya_gemini_key', settings.geminiKey);
     localStorage.setItem('sonya_auto_voice', settings.autoVoiceOutput ? 'true' : 'false');
+    localStorage.setItem('sonya_setup_dismissed', 'true');
+    setSetupDismissed(true);
+    setIsSettingsOpen(false);
+  };
 
+  const handleSkipSetup = () => {
+    localStorage.setItem('sonya_setup_dismissed', 'true');
+    setSetupDismissed(true);
     setIsSettingsOpen(false);
   };
 
@@ -252,6 +263,7 @@ export default function App() {
         autoVoiceOutput={autoVoiceOutput}
         onSave={handleSaveSettings}
         forceSetup={forceSetup}
+        onSkip={handleSkipSetup}
       />
     </div>
   );

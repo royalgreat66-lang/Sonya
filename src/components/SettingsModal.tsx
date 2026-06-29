@@ -9,6 +9,7 @@ interface SettingsModalProps {
   autoVoiceOutput: boolean;
   onSave: (settings: { openRouterKey: string; geminiKey: string; autoVoiceOutput: boolean }) => void;
   forceSetup?: boolean;
+  onSkip?: () => void;
 }
 
 export function SettingsModal({
@@ -19,6 +20,7 @@ export function SettingsModal({
   autoVoiceOutput,
   onSave,
   forceSetup = false,
+  onSkip,
 }: SettingsModalProps) {
   const [orKey, setOrKey] = useState(openRouterKey);
   const [gemKey, setGemKey] = useState(geminiKey);
@@ -117,7 +119,6 @@ export function SettingsModal({
                 type={showOr ? 'text' : 'password'}
                 value={orKey}
                 onChange={(e) => setOrKey(e.target.value)}
-                required
                 placeholder="sk-or-v1-..."
                 className="w-full bg-zinc-950 border border-violet-500/10 text-[#e2d9ff] text-sm px-3.5 py-2.5 rounded-lg pr-10 outline-none focus:border-[#8b5cf6]/40 focus:ring-1 focus:ring-[#8b5cf6]/20 transition-all font-mono"
                 id="input-openrouter-key"
@@ -151,7 +152,6 @@ export function SettingsModal({
                 type={showGem ? 'text' : 'password'}
                 value={gemKey}
                 onChange={(e) => setGemKey(e.target.value)}
-                required
                 placeholder="AIzaSy..."
                 className="w-full bg-zinc-950 border border-violet-500/10 text-[#e2d9ff] text-sm px-3.5 py-2.5 rounded-lg pr-10 outline-none focus:border-[#8b5cf6]/40 focus:ring-1 focus:ring-[#8b5cf6]/20 transition-all font-mono"
                 id="input-gemini-key"
@@ -242,6 +242,16 @@ export function SettingsModal({
                 </>
               )}
             </button>
+            {forceSetup && onSkip && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="w-full mt-2 py-2 text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+                id="btn-skip-setup"
+              >
+                Skip
+              </button>
+            )}
           </div>
         </form>
       </div>
