@@ -123,7 +123,7 @@ export function TopBar({
 
         <button
           onClick={onOpenSettings}
-          className="p-2 gap-1 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all text-xs font-medium flex items-center"
+          className="hidden md:flex p-2 gap-1 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all text-xs font-medium items-center"
           title="Open API Credentials Management"
           id="top-bar-settings-trigger"
         >

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, MessageSquare, Edit2, Trash2, Check, X, Menu } from 'lucide-react';
+import { Plus, MessageSquare, Edit2, Trash2, Check, X, Menu, Settings } from 'lucide-react';
 import { Conversation } from '../types';
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ interface SidebarProps {
   onRename: (id: number, newTitle: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  onOpenSettings: () => void;
 }
 
 export function Sidebar({
@@ -22,6 +23,7 @@ export function Sidebar({
   onRename,
   isOpen,
   onClose,
+  onOpenSettings,
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -289,6 +291,17 @@ export function Sidebar({
               {renderSection('Earlier', earlierGroup)}
             </>
           )}
+        </div>
+
+        <div className="md:hidden px-4 py-3 border-t border-[#8b5cf6]/10">
+          <button
+            onClick={onOpenSettings}
+            className="p-2 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all"
+            title="Open API Credentials Management"
+            id="sidebar-settings-trigger"
+          >
+            <Settings size={14} />
+          </button>
         </div>
 
         {/* Bottom Workspace Anchor */}

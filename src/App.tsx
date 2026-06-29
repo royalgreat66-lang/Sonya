@@ -242,6 +242,7 @@ export default function App() {
           onRename={renameConversation}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
         {/* Right hand main viewport workspace */}
