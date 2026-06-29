@@ -101,7 +101,7 @@ export function TopBar({
           <>
             <button
               onClick={handleTriggerRename}
-              className="p-1.5 text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-colors"
+              className="hidden md:inline-flex p-1.5 text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-colors"
               title="Rename Current Conversation"
               id="top-bar-rename-trigger"
             >
@@ -110,7 +110,7 @@ export function TopBar({
 
             <button
               onClick={handleTriggerDelete}
-              className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+              className="hidden md:inline-flex p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
               title="Delete Current Conversation"
               id="top-bar-delete-trigger"
             >

@@ -1,9 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
-@theme {
+/* Replaced invalid @theme at-rule with :root selector for CSS variables */
+:root {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Rotate app back to portrait on phone-sized landscape screens */
+@media (max-width: 926px) and (orientation: landscape) {
+  html {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
 }
 
 html,
@@ -30,4 +45,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+
 

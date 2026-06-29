@@ -194,13 +194,14 @@ export function Sidebar({
             size={15}
             className={`flex-shrink-0 ${isSelected ? 'text-[#8b5cf6]' : 'text-zinc-600'}`}
           />
-          <span className="text-sm font-medium leading-tight truncate pr-4">
+            <span className="text-sm font-medium leading-tight truncate pr-16 md:pr-4">
             {conv.title}
           </span>
         </div>
 
         {/* Hover Action HUD */}
-        <div className="absolute right-2 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity bg-gradient-to-l from-zinc-950/90 via-zinc-950/50 to-transparent pl-3 h-full">
+          {/* Buttons always visible on mobile, hover only on desktop */}
+          <div className="absolute right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex items-center gap-1 transition-opacity bg-gradient-to-l from-zinc-950/90 via-zinc-950/50 to-transparent pl-3 h-full">
           <button
             onClick={(e) => handleStartRename(e, conv.id!, conv.title)}
             className="p-1 text-[#888] hover:text-[#8b5cf6] hover:bg-white/5 rounded transition-colors"
@@ -249,7 +250,7 @@ export function Sidebar({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 z-50 h-screen w-[210px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] ${
+        className={`fixed md:sticky top-0 left-0 z-50 h-screen w-[270px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         id="sidebar-container"
