@@ -25,7 +25,6 @@ export function InputBox({
   isListening,
   isStreaming,
   speechSupported,
-  speechLang,
   onToggleListening,
   onChangeSpeechLang,
   onCancelStreaming,
@@ -61,6 +60,10 @@ export function InputBox({
       vv.removeEventListener('scroll', keepInputVisible);
     };
   }, []);
+
+  useEffect(() => {
+    onChangeSpeechLang('en-US');
+  }, [onChangeSpeechLang]);
 
   const handleTextareaFocus = () => {
     window.setTimeout(() => {
@@ -102,16 +105,12 @@ export function InputBox({
     setAttachedImage(null);
   };
 
-  const toggleLang = () => {
-    onChangeSpeechLang(speechLang === 'en-US' ? 'ar-EG' : 'en-US');
-  };
-
   return (
     <div className="px-6 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2" id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />
-          <span>Active listening ({speechLang === 'en-US' ? 'English' : 'Arabic'})... Speak clearly now</span>
+          <span>Active listening (English)... Speak clearly now</span>
         </div>
       )}
 
@@ -176,17 +175,6 @@ export function InputBox({
         <div className="flex items-center gap-1.5 h-10 pr-0.5 flex-shrink-0 self-end">
           {speechSupported ? (
             <div className="flex items-center gap-1 bg-[#121020] border-[0.5px] border-violet-500/10 p-1.5 rounded-lg select-container" id="speech-control-hud">
-              {/* Language toggler badge */}
-              <button
-                type="button"
-                onClick={toggleLang}
-                className="px-1.5 py-0.5 text-[9px] font-mono tracking-wider font-extrabold bg-[#221040] text-violet-200 border border-[#8b5cf6]/20 rounded-md hover:bg-[#8b5cf6]/20 transition-colors uppercase cursor-pointer"
-                title={`Change speech dictation language (Current: ${speechLang === 'en-US' ? 'English' : 'Arabic'})`}
-                id="btn-lang-speech-dictation"
-              >
-                {speechLang === 'en-US' ? 'EN' : 'AR'}
-              </button>
-
               <button
                 type="button"
                 onClick={onToggleListening}
