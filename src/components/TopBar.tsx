@@ -49,7 +49,7 @@ export function TopBar({
   };
 
   return (
-    <header className="h-[60px] border-b border-[#8b5cf6]/10 bg-black/40 backdrop-blur-sm px-6 flex items-center justify-between sticky top-0 z-30" id="top-bar-header">
+    <header className="min-h-[60px] border-b border-[#8b5cf6]/10 bg-black/40 backdrop-blur-sm px-6 flex items-center justify-between sticky top-0 z-30 pt-[env(safe-area-inset-top)] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]" id="top-bar-header">
       {/* Left controls panel - Menu drawer launcher & Selector */}
       <div className="flex items-center gap-3">
         <button

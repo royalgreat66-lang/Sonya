@@ -6,6 +6,23 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+html,
+body {
+  background-color: #000000;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+  background-color: #000000;
+}
+
 @layer utilities {
   .text-rendering {
     text-rendering: optimizeLegibility;

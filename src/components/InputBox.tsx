@@ -41,6 +41,33 @@ export function InputBox({
     }
   }, [value]);
 
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keepInputVisible = () => {
+      if (document.activeElement === textareaRef.current) {
+        requestAnimationFrame(() => {
+          textareaRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
+        });
+      }
+    };
+
+    vv.addEventListener('resize', keepInputVisible);
+    vv.addEventListener('scroll', keepInputVisible);
+
+    return () => {
+      vv.removeEventListener('resize', keepInputVisible);
+      vv.removeEventListener('scroll', keepInputVisible);
+    };
+  }, []);
+
+  const handleTextareaFocus = () => {
+    window.setTimeout(() => {
+      textareaRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
+    }, 300);
+  };
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
     
@@ -80,7 +107,7 @@ export function InputBox({
   };
 
   return (
-    <div className="p-6 bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2" id="input-tray-wrapper">
+    <div className="px-6 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2" id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />
@@ -136,6 +163,7 @@ export function InputBox({
           ref={textareaRef}
           value={value}
           onChange={handleTextareaChange}
+          onFocus={handleTextareaFocus}
           onKeyDown={handleKeyDown}
           placeholder="Say something to Sonya..."
           rows={1}

@@ -20,6 +20,8 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputVal, setInputVal] = useState('');
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [viewportOffsetTop, setViewportOffsetTop] = useState(0);
 
   // Audio Playback state
   const [currentlyPlayingMsgId, setCurrentlyPlayingMsgId] = useState<number | null | string>(null);
@@ -70,6 +72,26 @@ export default function App() {
       setIsSettingsOpen(true);
     }
   }, [forceSetup]);
+
+  // Resize layout to the visual viewport when the on-screen keyboard opens (iOS)
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const syncViewport = () => {
+      setViewportHeight(vv.height);
+      setViewportOffsetTop(vv.offsetTop);
+    };
+
+    vv.addEventListener('resize', syncViewport);
+    vv.addEventListener('scroll', syncViewport);
+    syncViewport();
+
+    return () => {
+      vv.removeEventListener('resize', syncViewport);
+      vv.removeEventListener('scroll', syncViewport);
+    };
+  }, []);
 
   // Clean playVoiceText routine
   const playVoiceText = async (msgId: number | string, text: string) => {
@@ -183,7 +205,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full relative bg-black text-[#e2d9ff] font-sans flex text-rendering" id="sonya-application-root">
+    <div
+      className="min-h-[100dvh] w-full relative bg-black text-[#e2d9ff] font-sans flex text-rendering"
+      id="sonya-application-root"
+      style={
+        viewportHeight !== null
+          ? {
+              height: `${viewportHeight}px`,
+              minHeight: `${viewportHeight}px`,
+              transform: viewportOffsetTop > 0 ? `translateY(${viewportOffsetTop}px)` : undefined,
+            }
+          : undefined
+      }
+    >
       {/* Dynamic Ambient Blur Canopy */}
       <div
         className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000"
@@ -193,7 +227,11 @@ export default function App() {
         id="ambient-aurora-bg"
       />
 
-      <div className="flex w-full h-screen z-10 overflow-hidden relative" id="layout-grid-workspace">
+      <div
+        className="flex w-full h-full z-10 overflow-hidden relative"
+        id="layout-grid-workspace"
+        style={viewportHeight !== null ? { height: `${viewportHeight}px` } : { height: '100dvh' }}
+      >
         {/* Responsive left hand sidebar drawer controls */}
         <Sidebar
           conversations={conversations}

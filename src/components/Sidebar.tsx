@@ -247,7 +247,7 @@ export function Sidebar({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 z-50 h-screen w-[210px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in ${
+        className={`fixed md:sticky top-0 left-0 z-50 h-screen w-[210px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         id="sidebar-container"
