@@ -73,8 +73,12 @@ export default function App() {
     }
   }, [forceSetup]);
 
-  // Resize layout to the visual viewport when the on-screen keyboard opens (iOS)
+  // Detect mobile devices (iOS/Android) – only apply visual‑viewport handling on mobile
+  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  // Resize layout to the visual viewport when the on‑screen keyboard opens (iOS) – mobile only
   useEffect(() => {
+    if (!isMobile) return;
     const vv = window.visualViewport;
     if (!vv) return;
 
@@ -91,7 +95,7 @@ export default function App() {
       vv.removeEventListener('resize', syncViewport);
       vv.removeEventListener('scroll', syncViewport);
     };
-  }, []);
+  }, [isMobile]);
 
   // Clean playVoiceText routine
   const playVoiceText = async (msgId: number | string, text: string) => {

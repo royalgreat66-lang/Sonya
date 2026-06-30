@@ -34,6 +34,8 @@ export function InputBox({
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   // State to track whether the on-screen keyboard is open (mobile)
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  // Detect mobile devices (iOS/Android)
+  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -125,7 +127,7 @@ export function InputBox({
   };
 
   return (
-    <div className={`px-6 pt-6 ${isKeyboardOpen ? "pb-[calc(1.5rem)]" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
+    <div className={`px-6 pt-6 ${isKeyboardOpen && isMobile ? "pb-[calc(1.5rem)]" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />
