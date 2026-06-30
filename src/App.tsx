@@ -28,6 +28,7 @@ export default function App() {
   const [currentlyPlayingMsgId, setCurrentlyPlayingMsgId] = useState<number | null | string>(null);
   const [ttsLoadingMsgId, setTtsLoadingMsgId] = useState<number | null | string>(null);
   const activeAudioRef = useRef<{ stop: () => void } | null>(null);
+  const initialWindowHeightRef = useRef(0);
 
   // Hook integrations
   const {
@@ -83,6 +84,11 @@ export default function App() {
     const vv = window.visualViewport;
     if (!vv) return;
 
+    // Capture the initial full window height as a stable baseline for keyboard detection
+    if (initialWindowHeightRef.current === 0) {
+      initialWindowHeightRef.current = window.innerHeight;
+    }
+
     let rafId: number | null = null;
 
     const syncViewport = () => {
@@ -91,8 +97,8 @@ export default function App() {
         rafId = null;
         setViewportHeight(vv.height);
         setViewportOffsetTop(vv.offsetTop);
-        // Detect keyboard open/close by comparing layout vs visual viewport height
-        setIsKeyboardOpen(window.innerHeight - vv.height > 100);
+        // Detect keyboard open/close against the stable captured baseline
+        setIsKeyboardOpen(initialWindowHeightRef.current - vv.height > 100);
       });
     };
 
@@ -318,6 +324,7 @@ export default function App() {
         forceSetup={forceSetup}
         onSkip={handleSkipSetup}
       />
+
     </div>
   );
 }

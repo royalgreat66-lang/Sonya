@@ -46,6 +46,17 @@ export function InputBox({
     }
   }, [value]);
 
+  // Fix first-load textarea height alignment: run after fonts/layout settle
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // NOTE: visualViewport resize/scroll handling is consolidated in App.tsx
   // and passed down via the isKeyboardOpen prop. No duplicate listeners here.
   useEffect(() => {
@@ -93,7 +104,7 @@ export function InputBox({
   };
 
   return (
-    <div className={`px-6 pt-6 ${isKeyboardOpen && isMobile ? "pb-[calc(1.5rem)]" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
+    <div className={`px-6 pt-6 ${isKeyboardOpen && isMobile ? "pb-[calc(0.5rem)]" : "pb-[calc(0.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />
@@ -121,7 +132,7 @@ export function InputBox({
         </div>
       )}
 
-      <div className="w-full max-w-3xl mx-auto flex items-end gap-3 bg-[#0a0814]/80 border border-[#8b5cf6]/20 backdrop-blur-md rounded-2xl p-3 shadow-2xl shadow-violet-900/10 relative z-10" id="input-box-container">
+      <div className="w-full max-w-3xl mx-auto flex items-center gap-3 bg-[#0a0814]/80 border border-[#8b5cf6]/20 backdrop-blur-md rounded-2xl p-3 shadow-2xl shadow-violet-900/10 relative z-10" id="input-box-container">
         {/* Image attachment button */}
         <input
           ref={fileInputRef}
@@ -154,7 +165,7 @@ export function InputBox({
           placeholder="Say something to Sonya..."
           rows={1}
           maxLength={4000}
-          className="flex-1 max-h-[150px] overflow-y-auto bg-transparent border-0 outline-none text-[#e2d9ff] text-[14px] leading-relaxed py-1.5 px-1 placeholder-zinc-600 resize-none font-sans scrollbar-thin scrollbar-thumb-zinc-800"
+          className="flex-1 max-h-[150px] overflow-y-auto bg-transparent border-0 outline-none text-[#e2d9ff] text-[14px] leading-normal py-2 px-1 placeholder-zinc-600 resize-none font-sans scrollbar-thin scrollbar-thumb-zinc-800"
           id="textarea-user-input"
         />
 
