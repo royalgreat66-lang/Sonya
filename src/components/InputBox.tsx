@@ -32,6 +32,8 @@ export function InputBox({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  // State to track whether the on-screen keyboard is open (mobile)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -58,6 +60,23 @@ export function InputBox({
     return () => {
       vv.removeEventListener('resize', keepInputVisible);
       vv.removeEventListener('scroll', keepInputVisible);
+    };
+  }, []);
+
+  // Detect keyboard open/close using visualViewport height changes
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handleResize = () => {
+      // If the viewport height is reduced significantly, assume keyboard is open
+      const isOpen = window.innerHeight - vv.height > 100; // threshold in pixels
+      setIsKeyboardOpen(isOpen);
+    };
+    vv.addEventListener('resize', handleResize);
+    // Initial check
+    handleResize();
+    return () => {
+      vv.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -106,7 +125,7 @@ export function InputBox({
   };
 
   return (
-    <div className="px-6 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2" id="input-tray-wrapper">
+    <div className={`px-6 pt-6 ${isKeyboardOpen ? "pb-[calc(1.5rem)]" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />
@@ -223,12 +242,6 @@ export function InputBox({
         </div>
       </div>
       
-      {/* Footer copyright label */}
-      <div className="w-full text-center py-1 flex items-center justify-center">
-        <span className="text-[10px] text-zinc-600 mt-2 uppercase tracking-[0.2em] font-semibold font-mono select-none">
-          Private Instance • Encrypted Locally • AI 2.0
-        </span>
-      </div>
     </div>
   );
 }

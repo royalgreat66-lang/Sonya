@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Sparkles, AlertCircle, HelpCircle } from 'lucide-react';
-import { Message } from '../types';
+import { Message, ContentPart } from '../types';
 import { MessageBubble } from './MessageBubble';
 
 interface ChatWindowProps {
@@ -40,6 +40,16 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
+  // Helper to extract plain text from message content which can be a string or an array of ContentPart
+  const getMessageText = (content: string | ContentPart[]): string => {
+    if (typeof content === 'string') return content;
+    // Filter only text parts and concatenate them
+    return content
+      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .map(part => part.text)
+      .join('');
+  };
 
   // Auto-scroll anchor trigger on content changes
   useEffect(() => {
@@ -106,7 +116,7 @@ export function ChatWindow({
                 message={msg}
                 isPlayingVoice={currentlyPlayingMsgId === msg.id}
                 isVoiceLoading={ttsLoadingMsgId === msg.id}
-                onPlayVoice={() => onPlayVoice(msg.id ?? index, msg.content)}
+                onPlayVoice={() => onPlayVoice(msg.id ?? index, getMessageText(msg.content))}
                 onStopVoice={onStopVoice}
                 geminiKeyConfigured={geminiKeyConfigured}
                 onEditMessage={onEditMessage}
