@@ -22,6 +22,7 @@ export default function App() {
   const [inputVal, setInputVal] = useState('');
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [viewportOffsetTop, setViewportOffsetTop] = useState(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   // Audio Playback state
   const [currentlyPlayingMsgId, setCurrentlyPlayingMsgId] = useState<number | null | string>(null);
@@ -76,15 +77,23 @@ export default function App() {
   // Detect mobile devices (iOS/Android) – only apply visual‑viewport handling on mobile
   const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
 
-  // Resize layout to the visual viewport when the on‑screen keyboard opens (iOS) – mobile only
+  // Consolidated, throttled visualViewport handler for mobile keyboard (iOS/Android)
   useEffect(() => {
     if (!isMobile) return;
     const vv = window.visualViewport;
     if (!vv) return;
 
+    let rafId: number | null = null;
+
     const syncViewport = () => {
-      setViewportHeight(vv.height);
-      setViewportOffsetTop(vv.offsetTop);
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        setViewportHeight(vv.height);
+        setViewportOffsetTop(vv.offsetTop);
+        // Detect keyboard open/close by comparing layout vs visual viewport height
+        setIsKeyboardOpen(window.innerHeight - vv.height > 100);
+      });
     };
 
     vv.addEventListener('resize', syncViewport);
@@ -94,6 +103,7 @@ export default function App() {
     return () => {
       vv.removeEventListener('resize', syncViewport);
       vv.removeEventListener('scroll', syncViewport);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [isMobile]);
 
@@ -217,7 +227,6 @@ export default function App() {
           ? {
               height: `${viewportHeight}px`,
               minHeight: `${viewportHeight}px`,
-              transform: viewportOffsetTop > 0 ? `translateY(${viewportOffsetTop}px)` : undefined,
             }
           : undefined
       }
@@ -293,6 +302,7 @@ export default function App() {
             onToggleListening={toggleListening}
             onChangeSpeechLang={setSpeechLang}
             onCancelStreaming={cancelStreaming}
+            isKeyboardOpen={isKeyboardOpen}
           />
         </div>
       </div>

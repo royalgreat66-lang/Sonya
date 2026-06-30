@@ -41,6 +41,9 @@ export function ChatWindow({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
+  // Detect mobile to avoid smooth-scroll conflicts with keyboard resize
+  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+
   // Helper to extract plain text from message content which can be a string or an array of ContentPart
   const getMessageText = (content: string | ContentPart[]): string => {
     if (typeof content === 'string') return content;
@@ -52,9 +55,10 @@ export function ChatWindow({
   };
 
   // Auto-scroll anchor trigger on content changes
+  // Use behavior: 'auto' on mobile to prevent layout thrashing with keyboard resize
   useEffect(() => {
-    scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingMessage, isStreaming]);
+    scrollAnchorRef.current?.scrollIntoView({ behavior: isMobile ? 'auto' : 'smooth' });
+  }, [messages, streamingMessage, isStreaming, isMobile]);
 
   if (isLoading) {
     return (

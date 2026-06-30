@@ -15,6 +15,9 @@ interface InputBoxProps {
   onToggleListening: () => void;
   onChangeSpeechLang: (lang: 'en-US' | 'ar-EG') => void;
   onCancelStreaming: () => void;
+
+  // Keyboard state (managed by App.tsx)
+  isKeyboardOpen: boolean;
 }
 
 export function InputBox({
@@ -28,12 +31,11 @@ export function InputBox({
   onToggleListening,
   onChangeSpeechLang,
   onCancelStreaming,
+  isKeyboardOpen,
 }: InputBoxProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
-  // State to track whether the on-screen keyboard is open (mobile)
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   // Detect mobile devices (iOS/Android)
   const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
 
@@ -44,44 +46,8 @@ export function InputBox({
     }
   }, [value]);
 
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const keepInputVisible = () => {
-      if (document.activeElement === textareaRef.current) {
-        requestAnimationFrame(() => {
-          textareaRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
-        });
-      }
-    };
-
-    vv.addEventListener('resize', keepInputVisible);
-    vv.addEventListener('scroll', keepInputVisible);
-
-    return () => {
-      vv.removeEventListener('resize', keepInputVisible);
-      vv.removeEventListener('scroll', keepInputVisible);
-    };
-  }, []);
-
-  // Detect keyboard open/close using visualViewport height changes
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const handleResize = () => {
-      // If the viewport height is reduced significantly, assume keyboard is open
-      const isOpen = window.innerHeight - vv.height > 100; // threshold in pixels
-      setIsKeyboardOpen(isOpen);
-    };
-    vv.addEventListener('resize', handleResize);
-    // Initial check
-    handleResize();
-    return () => {
-      vv.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
+  // NOTE: visualViewport resize/scroll handling is consolidated in App.tsx
+  // and passed down via the isKeyboardOpen prop. No duplicate listeners here.
   useEffect(() => {
     onChangeSpeechLang('en-US');
   }, [onChangeSpeechLang]);
