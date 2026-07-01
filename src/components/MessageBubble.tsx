@@ -62,7 +62,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   return (
     <div
-      className={`flex gap-3.5 max-w-[85%] md:max-w-[75%] ${
+      className={`flex gap-3.5 max-w-[85%] lg:max-w-[75%] ${
         isSonya ? 'self-start flex-row' : 'self-end flex-row-reverse'
       } animate-fade-in`}
       id={`msg-bubble-wrapper-${message.id || 'streaming'}`}

@@ -46,15 +46,21 @@ export function InputBox({
     }
   }, [value]);
 
-  // Fix first-load textarea height alignment: run after fonts/layout settle
+  // Fix first-load textarea height alignment: wait for fonts to load, then recalculate
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const adjustHeight = () => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
         textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
       }
-    }, 100);
-    return () => clearTimeout(timer);
+    };
+    // Use fonts.ready if available, fall back to a short timeout
+    const ready = document.fonts?.ready;
+    if (ready) {
+      ready.then(adjustHeight).catch(() => setTimeout(adjustHeight, 100));
+    } else {
+      setTimeout(adjustHeight, 100);
+    }
   }, []);
 
   // NOTE: visualViewport resize/scroll handling is consolidated in App.tsx
@@ -190,7 +196,7 @@ export function InputBox({
           ) : (
             <div className="px-2 py-1 text-[10px] text-zinc-600 flex items-center gap-1 cursor-default opacity-50" title="Voice dictation not supported in this browser" id="dictation-unsupported-tag">
               <AlertCircle size={10} />
-              <span className="hidden md:inline font-mono">No Mic Support</span>
+              <span className="hidden lg:inline font-mono">No Mic Support</span>
             </div>
           )}
 

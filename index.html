@@ -11,11 +11,17 @@
     <link rel="apple-touch-icon" href="/Sonya/apple-touch-icon.png" />
     <link rel="manifest" href="/Sonya/manifest.json" />
     <title>Sonya</title>
+    <!-- Critical inline CSS to prevent FOUC on mobile -->
+    <style>
+      html, body { background-color: #000; margin: 0; padding: 0; height: 100%; overflow: hidden; }
+      #root { height: 100%; background-color: #000; }
+      #initial-loader { display: flex; align-items: center; justify-content: center; height: 100%; }
+      #initial-loader::after { content: "Sonya"; color: #8b5cf6; font-family: system-ui, sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em; opacity: 0.6; animation: pulse 2s ease-in-out infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="initial-loader"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
-
