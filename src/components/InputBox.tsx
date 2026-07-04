@@ -16,8 +16,6 @@ interface InputBoxProps {
   onChangeSpeechLang: (lang: 'en-US' | 'ar-EG') => void;
   onCancelStreaming: () => void;
 
-  // Keyboard state (managed by App.tsx)
-  isKeyboardOpen: boolean;
 }
 
 export function InputBox({
@@ -31,7 +29,6 @@ export function InputBox({
   onToggleListening,
   onChangeSpeechLang,
   onCancelStreaming,
-  isKeyboardOpen,
 }: InputBoxProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,9 +67,8 @@ export function InputBox({
   }, [onChangeSpeechLang]);
 
   const handleTextareaFocus = () => {
-    window.setTimeout(() => {
-      textareaRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
-    }, 300);
+    // No-op — interactive-widget=resizes-content in the viewport meta tag
+    // now handles viewport resizing natively on iOS/Android.
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -86,6 +82,13 @@ export function InputBox({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      // Wipe any transient newline iOS may have inserted into the DOM
+      // before preventDefault could stop it, and reset height immediately
+      // so no inflated scrollHeight moment ever occurs.
+      if (textareaRef.current) {
+        textareaRef.current.value = '';
+        textareaRef.current.style.height = 'auto';
+      }
       if (!disableSend && value.trim()) {
         onSend(attachedImage || undefined);
         setAttachedImage(null);
@@ -110,7 +113,7 @@ export function InputBox({
   };
 
   return (
-    <div className={`px-6 pt-6 ${isKeyboardOpen && isMobile ? "pb-[calc(0.5rem)]" : "pb-[calc(0.5rem+env(safe-area-inset-bottom))]"} pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2`} id="input-tray-wrapper">
+    <div className="px-6 pt-6 pb-2 pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] bg-gradient-to-t from-black via-black/90 to-transparent flex flex-col gap-2" id="input-tray-wrapper">
       {isListening && (
         <div className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 border border-violet-500/20 text-xs text-violet-300 rounded-md self-center animate-pulse" id="mic-status-bubble">
           <Mic size={12} className="animate-bounce" />

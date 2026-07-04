@@ -20,15 +20,10 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputVal, setInputVal] = useState('');
-  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
-  const [viewportOffsetTop, setViewportOffsetTop] = useState(0);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-
   // Audio Playback state
   const [currentlyPlayingMsgId, setCurrentlyPlayingMsgId] = useState<number | null | string>(null);
   const [ttsLoadingMsgId, setTtsLoadingMsgId] = useState<number | null | string>(null);
   const activeAudioRef = useRef<{ stop: () => void } | null>(null);
-  const initialWindowHeightRef = useRef(0);
 
   // Hook integrations
   const {
@@ -75,43 +70,26 @@ export default function App() {
     }
   }, [forceSetup]);
 
-  // Detect mobile devices (iOS/Android) – only apply visual‑viewport handling on mobile
-  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
-
-  // Consolidated, throttled visualViewport handler for mobile keyboard (iOS/Android)
+  // iOS scroll gatekeeper: prevent the page/body from scrolling when the
+  // virtual keyboard is open (iOS ignores overflow:hidden on <body> once
+  // the keyboard appears). Allow scrolling only inside the messages list
+  // and the sidebar's scrollable conversation list.
   useEffect(() => {
-    if (!isMobile) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    // Capture the initial full window height as a stable baseline for keyboard detection
-    if (initialWindowHeightRef.current === 0) {
-      initialWindowHeightRef.current = window.innerHeight;
-    }
-
-    let rafId: number | null = null;
-
-    const syncViewport = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        setViewportHeight(vv.height);
-        setViewportOffsetTop(vv.offsetTop);
-        // Detect keyboard open/close against the stable captured baseline
-        setIsKeyboardOpen(initialWindowHeightRef.current - vv.height > 100);
-      });
+    const handler = (e: TouchEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      // Allow touch-scrolling inside the chat messages container
+      // or inside the sidebar (both its backdrop and its scrollable list).
+      // All other touches that would scroll the body are blocked.
+      const allowed = (target as Element).closest
+        ? (target as Element).closest('#messages-scroll-container, #sidebar-container')
+        : null;
+      if (allowed) return;
+      e.preventDefault();
     };
-
-    vv.addEventListener('resize', syncViewport);
-    vv.addEventListener('scroll', syncViewport);
-    syncViewport();
-
-    return () => {
-      vv.removeEventListener('resize', syncViewport);
-      vv.removeEventListener('scroll', syncViewport);
-      if (rafId !== null) cancelAnimationFrame(rafId);
-    };
-  }, [isMobile]);
+    document.addEventListener('touchmove', handler, { passive: false });
+    return () => document.removeEventListener('touchmove', handler);
+  }, []);
 
   // Clean playVoiceText routine
   const playVoiceText = async (msgId: number | string, text: string) => {
@@ -226,16 +204,8 @@ export default function App() {
 
   return (
     <div
-      className="min-h-[100dvh] w-full relative bg-black text-[#e2d9ff] font-sans flex text-rendering"
+      className="h-[100dvh] w-full relative bg-black text-[#e2d9ff] font-sans flex flex-col text-rendering"
       id="sonya-application-root"
-      style={
-        viewportHeight !== null
-          ? {
-              height: `${viewportHeight}px`,
-              minHeight: `${viewportHeight}px`,
-            }
-          : undefined
-      }
     >
       {/* Dynamic Ambient Blur Canopy */}
       <div
@@ -249,7 +219,6 @@ export default function App() {
       <div
         className="flex w-full h-full z-10 overflow-hidden relative"
         id="layout-grid-workspace"
-        style={viewportHeight !== null ? { height: `${viewportHeight}px` } : { height: '100dvh' }}
       >
         {/* Responsive left hand sidebar drawer controls */}
         <Sidebar
@@ -308,7 +277,6 @@ export default function App() {
             onToggleListening={toggleListening}
             onChangeSpeechLang={setSpeechLang}
             onCancelStreaming={cancelStreaming}
-            isKeyboardOpen={isKeyboardOpen}
           />
         </div>
       </div>
