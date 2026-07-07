@@ -41,6 +41,7 @@ export default function App() {
     sendMessage,
     cancelStreaming,
     editAndResend,
+    retryLastResponse,
   } = useChat();
 
   const {
@@ -268,6 +269,7 @@ export default function App() {
             onPlayVoice={playVoiceText}
             onStopVoice={stopVoiceText}
             onEditMessage={editAndResend}
+            onRetry={retryLastResponse}
           />
 
           {/* Bottom message tray bar layout */}

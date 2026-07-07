@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Loader2, Pencil } from 'lucide-react';
+import { Volume2, VolumeX, Loader2, Pencil, Copy, Check, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 
@@ -12,6 +12,7 @@ interface MessageBubbleProps {
   onStopVoice?: () => void;
   geminiKeyConfigured?: boolean;
   onEditMessage?: (messageId: number, newContent: string) => void;
+  onRetry?: (messageId: number) => void;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -23,13 +24,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onStopVoice,
   geminiKeyConfigured = true,
   onEditMessage,
+  onRetry,
 }) => {
+  // Extract plain text from message content (handles array-of-parts format)
   const getTextContent = (content: string | any[]): string => {
-    if (Array.isArray(content)) {
-      const textPart = content.find(part => part.type === 'text');
-      return textPart ? textPart.text : '';
-    }
-    return content;
+    if (typeof content === 'string') return content;
+    return content
+      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .map(part => part.text)
+      .join('');
   };
 
   const getImageContent = (content: string | any[]): string | null => {
@@ -47,6 +50,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [editContent, setEditContent] = useState(textContent);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const isSonya = message.role === 'assistant';
+  const [copied, setCopied] = useState(false);
   const displayTime = new Date(message.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -59,6 +63,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   };
 
   const isRtl = isArabicText(textContent);
+
+  const handleCopy = async () => {
+    const text = getTextContent(message.content);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard API may fail in insecure contexts — silently ignore
+    }
+  };
 
   return (
     <div
@@ -179,6 +195,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         {/* Sub-bubble Meta details */}
         <div className={`flex items-center gap-2.5 text-[10px] text-zinc-500/95 pl-1 pr-1 ${isSonya ? 'justify-start' : 'justify-end'}`}>
+          {/* Copy button — on all messages */}
+          {message.id && (
+            <button
+              onClick={handleCopy}
+              className="p-0.5 text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors"
+              title="Copy message text"
+            >
+              {copied ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
+            </button>
+          )}
+          <span className="text-zinc-700">|</span>
+
+          {/* Edit button — user messages only */}
           {!isSonya && onEditMessage && message.id && !isEditing && (
             <>
               <span
@@ -194,6 +223,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               <span className="text-zinc-700">|</span>
             </>
           )}
+
+          {/* Retry button — Sonya messages only */}
+          {isSonya && onRetry && message.id && !isStreaming && (
+            <>
+              <button
+                onClick={() => onRetry(message.id as number)}
+                className="p-0.5 text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors"
+                title="Regenerate response"
+              >
+                <RefreshCw size={10} />
+              </button>
+              <span className="text-zinc-700">|</span>
+            </>
+          )}
+
           <span className="font-mono">{displayTime}</span>
 
           {isSonya && geminiKeyConfigured && (

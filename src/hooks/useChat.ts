@@ -323,6 +323,86 @@ export function useChat() {
     );
   };
 
+  const retryLastResponse = async (sonyaMessageId: number) => {
+    // Find the Sonya message by index in the current messages array
+    const sonyaIndex = messages.findIndex(msg => msg.id === sonyaMessageId);
+    if (sonyaIndex < 1) return; // need at least one message before it
+    const sonyaMsg = messages[sonyaIndex];
+    if (sonyaMsg.role !== 'assistant') return; // not a Sonya message
+
+    // Preceding message must be a user message
+    const precedingUserMsg = messages[sonyaIndex - 1];
+    if (!precedingUserMsg || precedingUserMsg.role !== 'user') return;
+
+    if (!activeConversationId) return;
+
+    const sonyaTime = sonyaMsg.createdAt;
+
+    // Build history: everything before the Sonya message
+    const historyBeforeSonya = messages.slice(0, sonyaIndex);
+
+    // Delete from DB: Sonya message + everything after in time
+    await db.messages.where('conversationId').equals(activeConversationId)
+      .and(msg => msg.createdAt >= sonyaTime)
+      .delete();
+
+    // Update state to truncated history
+    setMessages(historyBeforeSonya);
+
+    // Re-read provider, key, model from localStorage
+    const apiKey = localStorage.getItem('sonya_openrouter_key') || '';
+    const model = localStorage.getItem('sonya_model') || '';
+    const provider = localStorage.getItem('sonya_provider') || 'openrouter';
+    const effectiveApiKey = provider === 'groq' ? (localStorage.getItem('groq_api_key') || '') : apiKey;
+
+    setSendError(null);
+    setIsStreaming(true);
+    setStreamingMessage('');
+    streamingMessageRef.current = '';
+    currentConvIdRef.current = activeConversationId;
+    originalMessagesRef.current = historyBeforeSonya;
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    await streamChatCompletion(
+      effectiveApiKey,
+      provider,
+      model,
+      historyBeforeSonya,
+      signal,
+      (accumulatedText) => {
+        setStreamingMessage(accumulatedText);
+        streamingMessageRef.current = accumulatedText;
+      },
+      async (fullText) => {
+        setIsStreaming(false);
+        setStreamingMessage(null);
+
+        const assistantMsg: Message = {
+          conversationId: activeConversationId,
+          role: 'assistant',
+          content: fullText,
+          createdAt: new Date(),
+        };
+        await db.messages.add(assistantMsg);
+
+        await db.conversations.update(activeConversationId, {
+          updatedAt: new Date(),
+        });
+
+        await loadConversations();
+        await loadMessages(activeConversationId);
+      },
+      (err) => {
+        setIsStreaming(false);
+        setStreamingMessage(null);
+        setSendError(err.message || 'Connection failed.');
+        console.error(err);
+      },
+    );
+  };
+
   const cancelStreaming = async () => {
     abortControllerRef.current?.abort();
 
@@ -365,5 +445,6 @@ export function useChat() {
     sendMessage,
     cancelStreaming,
     editAndResend,
+    retryLastResponse,
   };
 }

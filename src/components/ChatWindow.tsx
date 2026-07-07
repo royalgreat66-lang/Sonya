@@ -21,6 +21,9 @@ interface ChatWindowProps {
 
   // Edit message
   onEditMessage?: (messageId: number, newContent: string) => void;
+
+  // Retry (regenerate) Sonya's response
+  onRetry?: (messageId: number) => void;
 }
 
 export function ChatWindow({
@@ -37,6 +40,7 @@ export function ChatWindow({
   onPlayVoice,
   onStopVoice,
   onEditMessage,
+  onRetry,
 }: ChatWindowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
@@ -124,6 +128,7 @@ export function ChatWindow({
                 onStopVoice={onStopVoice}
                 geminiKeyConfigured={geminiKeyConfigured}
                 onEditMessage={onEditMessage}
+                onRetry={onRetry}
               />
             ))}
 
