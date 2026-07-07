@@ -13,6 +13,7 @@ interface TopBarProps {
   activeTitle: string;
   onRenameActive: (id: number, newTitle: string) => void;
   onDeleteActive: (id: number) => void;
+  isMobile: boolean;
 }
 
 export function TopBar({
@@ -26,6 +27,7 @@ export function TopBar({
   activeTitle,
   onRenameActive,
   onDeleteActive,
+  isMobile,
 }: TopBarProps) {
   const [isPromptRename, setIsPromptRename] = useState(false);
   const [providerSwitching, setProviderSwitching] = useState(false);
@@ -54,7 +56,7 @@ export function TopBar({
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors hover:bg-white/5 rounded-lg"
+          className={`${isMobile ? '' : 'hidden'} p-2 text-zinc-400 hover:text-white transition-colors hover:bg-white/5 rounded-lg`}
           title="Toggle Navigation Menu"
           aria-label="Toggle navigation drawer"
           id="btn-sidebar-drawer-toggle"
@@ -87,7 +89,7 @@ export function TopBar({
       </div>
 
       {/* Center metadata tag */}
-      <div className="hidden lg:block text-center max-w-[200px] truncate" id="top-bar-current-context">
+      <div className={`${isMobile ? 'hidden' : 'block'} text-center max-w-[200px] truncate`} id="top-bar-current-context">
         {activeId && (
           <span className="text-xs font-semibold text-[#888] tracking-tight">
             Chatting: <span className="text-[#e2d9ff]">{activeTitle}</span>
@@ -101,7 +103,7 @@ export function TopBar({
           <>
             <button
               onClick={handleTriggerRename}
-              className="hidden lg:inline-flex p-1.5 text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-colors"
+              className={`${isMobile ? 'hidden' : 'inline-flex'} p-1.5 text-zinc-400 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-colors`}
               title="Rename Current Conversation"
               id="top-bar-rename-trigger"
             >
@@ -110,7 +112,7 @@ export function TopBar({
 
             <button
               onClick={handleTriggerDelete}
-              className="hidden lg:inline-flex p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+              className={`${isMobile ? 'hidden' : 'inline-flex'} p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors`}
               title="Delete Current Conversation"
               id="top-bar-delete-trigger"
             >
@@ -123,7 +125,7 @@ export function TopBar({
 
         <button
           onClick={onOpenSettings}
-          className="hidden lg:flex p-2 gap-1 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all text-xs font-medium items-center"
+          className={`${isMobile ? 'hidden' : 'flex'} p-2 gap-1 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all text-xs font-medium items-center`}
           title="Open API Credentials Management"
           id="top-bar-settings-trigger"
         >

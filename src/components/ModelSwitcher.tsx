@@ -263,7 +263,7 @@ await navigator.clipboard.writeText(allIds.join('\n'));
   const hasModels = models.allFiltered.length > 0;
 
   return (
-    <div className="relative inline-flex items-center gap-2 select-container" id="model-switcher">
+    <div className="relative inline-flex items-center gap-2 min-w-0 flex-shrink select-container" id="model-switcher">
       <div className="hidden sm:flex items-center gap-1.5 p-1 px-2 border border-violet-500/10 rounded-md bg-[#0a0810]/50">
         <Cpu size={12} className="text-violet-400" />
         <span className="text-[10px] font-mono uppercase text-[#888] tracking-wider">Engine:</span>
@@ -278,7 +278,7 @@ await navigator.clipboard.writeText(allIds.join('\n'));
             }
           }}
           onFocus={handleFocus}
-          className="appearance-none bg-[#0a0814]/80 border border-[#8b5cf6]/20 text-violet-300 pl-3 pr-8 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/30 hover:bg-[#8b5cf6]/5 transition-all cursor-pointer shadow-md inline-flex items-center w-[240px] truncate"
+          className="appearance-none bg-[#0a0814]/80 border border-[#8b5cf6]/20 text-violet-300 pl-3 pr-8 py-1.5 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/30 hover:bg-[#8b5cf6]/5 transition-all cursor-pointer shadow-md inline-flex items-center w-auto min-w-[100px] max-w-[180px] truncate"
           id="model-dropdown-select"
         >
           {!hasModels ? (

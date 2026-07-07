@@ -70,6 +70,10 @@ export default function App() {
     }
   }, [forceSetup]);
 
+  // Detect mobile devices (iOS/Android) – used to prevent width-based
+  // breakpoints from switching to desktop layout on landscape phones
+  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+
   // iOS scroll gatekeeper: prevent the page/body from scrolling when the
   // virtual keyboard is open (iOS ignores overflow:hidden on <body> once
   // the keyboard appears). Allow scrolling only inside the messages list
@@ -204,7 +208,7 @@ export default function App() {
 
   return (
     <div
-      className="h-[100dvh] w-full relative bg-black text-[#e2d9ff] font-sans flex flex-col text-rendering"
+      className={`h-[100dvh] ${isMobile ? 'w-full max-w-md mx-auto' : 'w-full'} relative bg-black text-[#e2d9ff] font-sans flex flex-col text-rendering`}
       id="sonya-application-root"
     >
       {/* Dynamic Ambient Blur Canopy */}
@@ -231,6 +235,7 @@ export default function App() {
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          isMobile={isMobile}
         />
 
         {/* Right hand main viewport workspace */}
@@ -246,6 +251,7 @@ export default function App() {
             activeTitle={activeTitle}
             onRenameActive={renameConversation}
             onDeleteActive={deleteConversation}
+            isMobile={isMobile}
           />
 
           <ChatWindow

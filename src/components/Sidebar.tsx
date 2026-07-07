@@ -12,6 +12,7 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenSettings: () => void;
+  isMobile: boolean;
 }
 
 export function Sidebar({
@@ -24,6 +25,7 @@ export function Sidebar({
   isOpen,
   onClose,
   onOpenSettings,
+  isMobile,
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -242,7 +244,7 @@ export function Sidebar({
       {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity"
+          className={`${isMobile ? 'fixed' : 'hidden'} inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity`}
           onClick={onClose}
           id="sidebar-overlay"
         />
@@ -250,8 +252,8 @@ export function Sidebar({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-[270px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`${isMobile ? 'fixed' : 'sticky'} top-0 left-0 z-50 h-screen w-[270px] bg-[#0a0810]/85 backdrop-blur-xl border-r border-[#8b5cf6]/20 flex flex-col transition-transform duration-300 ease-out-in pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] ${
+          isOpen ? 'translate-x-0' : (isMobile ? '-translate-x-full' : 'translate-x-0')
         }`}
         id="sidebar-container"
       >
@@ -294,7 +296,7 @@ export function Sidebar({
           )}
         </div>
 
-        <div className="lg:hidden px-4 py-3 border-t border-[#8b5cf6]/10">
+        <div className={`${isMobile ? '' : 'hidden'} px-4 py-3 border-t border-[#8b5cf6]/10`}>
           <button
             onClick={onOpenSettings}
             className="p-2 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-[#e2d9ff] hover:text-white rounded-lg transition-all"
@@ -310,7 +312,7 @@ export function Sidebar({
           <span className="text-[10px] text-zinc-600 font-mono">Local IndexedDB Mode</span>
           <button
             onClick={onClose}
-            className="lg:hidden text-xs text-[#888] hover:text-[#e2d9ff] px-2 py-1 bg-white/5 rounded-md"
+            className={`${isMobile ? '' : 'hidden'} text-xs text-[#888] hover:text-[#e2d9ff] px-2 py-1 bg-white/5 rounded-md`}
             id="close-sidebar-btn"
           >
             Hide
