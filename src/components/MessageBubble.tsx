@@ -137,16 +137,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         )}
 
         {/* Message Content Container */}
-        <div className="group relative">
-          {isEditing ? (
-            <div className="space-y-2 w-[min(600px,90vw)]">
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="w-full bg-[#0a0814] border border-[#8b5cf6]/40 text-[#e2d9ff] rounded-xl px-3 py-2 text-[13.5px] leading-relaxed resize-none focus:outline-none focus:border-violet-500 font-sans"
-                rows={4}
-              />
-              <div className="flex gap-2">
+        <div className="group relative flex flex-col">
+                           {isEditing ? (
+              <div className={`${!isSonya ? 'ml-auto' : ''} space-y-2 sm:w-[min(600px,90vw)]`}>
+               <textarea
+                 value={editContent}
+                 onChange={(e) => setEditContent(e.target.value)}
+                 className="w-full bg-[#0a0814] border border-[#8b5cf6]/40 text-[#e2d9ff] rounded-xl px-3 py-2 text-[13.5px] leading-relaxed resize-none focus:outline-none focus:border-violet-500 font-sans"
+                 rows={4}
+               />
+               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() => {
                     if (onEditMessage && message.id) {
