@@ -78,7 +78,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   return (
     <div
-      className={`flex gap-3.5 max-w-[85%] lg:max-w-[75%] ${
+      className={`flex gap-3.5 ${isEditing ? 'w-[95%] max-w-[95%] lg:w-auto' : 'max-w-[85%]'} lg:max-w-[75%] ${
         isSonya ? 'self-start flex-row' : 'self-end flex-row-reverse'
       } animate-fade-in`}
       id={`msg-bubble-wrapper-${message.id || 'streaming'}`}
@@ -96,7 +96,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       </div>
 
       {/* Bubble, Timestamp, and Voice Trigger Container */}
-      <div className="space-y-1">
+      <div className={`space-y-1 ${isEditing ? 'w-full min-w-0' : ''}`}>
         {/* Name Header for Sonya */}
         {isSonya && (
           <p className="text-[11px] font-extrabold tracking-wide uppercase text-violet-400 pl-0.5">
@@ -139,7 +139,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {/* Message Content Container */}
         <div className="group relative flex flex-col">
                            {isEditing ? (
-              <div className={`${!isSonya ? 'ml-auto' : ''} space-y-2 sm:w-[min(600px,90vw)]`}>
+              <div className={`${!isSonya ? 'ml-auto' : ''} space-y-2 w-full sm:w-[min(600px,90vw)]`}>
                <textarea
                  value={editContent}
                  onChange={(e) => setEditContent(e.target.value)}
