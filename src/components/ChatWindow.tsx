@@ -82,7 +82,7 @@ export function ChatWindow({
       {/* Scrollable chat body */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent"
+        className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-4 lg:py-6 lg:space-y-6 scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent"
         id="messages-scroll-container"
       >
         {isWelcomeScreen ? (
