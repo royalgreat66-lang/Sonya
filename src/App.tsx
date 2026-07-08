@@ -87,7 +87,7 @@ export default function App() {
       // or inside the sidebar (both its backdrop and its scrollable list).
       // All other touches that would scroll the body are blocked.
       const allowed = (target as Element).closest
-        ? (target as Element).closest('#messages-scroll-container, #sidebar-container')
+          ? (target as Element).closest('#messages-scroll-container, #sidebar-container, #textarea-user-input')
         : null;
       if (allowed) return;
       e.preventDefault();
